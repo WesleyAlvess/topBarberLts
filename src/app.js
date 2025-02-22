@@ -3,7 +3,7 @@ import express from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
 import connectDB from './configs/database.js';
-import salaoRouter from './routes/routes.js'
+import salaoRouter from './routes/salao.route.js'
 
 dotenv.config();
 connectDB();
@@ -15,7 +15,7 @@ app.use(express.json());
 app.use(cors());
 
 // Rotas
-app.use('/salao', salaoRouter);
+app.use('/api', salaoRouter);
 
 
 // Iniciar servidor

@@ -22,7 +22,7 @@ const agendamentoSchema = new mongoose.Schema({
   },
   status: {
     type: String,
-    default: 'Pendente',
+    default: 'pendente',
   },
   dataCadastro: {
     type: Date,
