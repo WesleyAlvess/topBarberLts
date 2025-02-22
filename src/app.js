@@ -4,6 +4,7 @@ import cors from 'cors';
 import dotenv from 'dotenv';
 import connectDB from './configs/database.js';
 import salaoRouter from './routes/salao.route.js'
+import Usuario from './routes/usuario.route.js'
 
 dotenv.config();
 connectDB();
@@ -15,7 +16,11 @@ app.use(express.json());
 app.use(cors());
 
 // Rotas
+// Rotas para salões
 app.use('/api', salaoRouter);
+
+// Rotas para usuários
+app.use('/api/user', Usuario);
 
 
 // Iniciar servidor

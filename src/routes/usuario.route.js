@@ -1,5 +1,5 @@
 import express from "express";
-import { createUsuario, loginUsuario, getUsuarioById, updateUsuario, deleteUsuario } from "../controllers/userController.js";
+import { createUsuario, loginUsuario } from "../controllers/usuario.controller.js";
 
 const router = express.Router();
 
@@ -10,12 +10,12 @@ router.post("/", createUsuario);
 router.post("/login", loginUsuario);
 
 // Rota para buscar um usuário pelo ID
-router.get("/:id", getUsuarioById);
+// router.get("/:id", getUsuarioById);
 
 // Rota para atualizar um usuário existente
-router.put("/:id", updateUsuario);
+// router.put("/:id", updateUsuario);
 
 // Rota para deletar um usuário
-router.delete("/:id", deleteUsuario);
+// router.delete("/:id", deleteUsuario);
 
 export default router;
