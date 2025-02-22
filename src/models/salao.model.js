@@ -1,39 +1,30 @@
 import mongoose from 'mongoose';
 
-const salaoSchema = new mongoose.Schema(
-    {
-        nome: {
-            type: String,
-            required: true,
-            trim: true,
-        },
-        localizacao: {
-            type: String,
-            required: true,
-            trim: true,
-        },
-        telefone: {
-            type: String,
-            required: true,
-            trim: true,
-        },
-        servicos: [
-            {
-                type: String,
-                required: true,
-            },
-        ],
-        horario: {
-            type: Map,
-            of: String, 
-            required: true,
-        },
+const salaoSchema = new mongoose.Schema({
+    nome: {
+        type: String,
+        required: true,
+        trim: true,
     },
-    {
-        timestamps: true, // Cria os campos `createdAt` e `updatedAt`
+    dono: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'User',
+        required: true,
+    },
+    endereco: {
+        type: String,
+        required: true,
+    },
+    servicos: [
+        {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: 'Servico',
+        },
+    ],
+    dataCadastro: {
+        type: Date,
+        default: Date.now,
     }
-);
+});
 
-const Salao = mongoose.model('Salao', salaoSchema);
-
-export default Salao;
+export default mongoose.model('Salao', salaoSchema)
