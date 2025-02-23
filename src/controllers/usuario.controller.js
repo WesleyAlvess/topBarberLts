@@ -2,13 +2,12 @@ import Usuario from "../models/usuario.model.js";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 
-
 // Criar um novo usuário
 export const createUsuario = async (req, res) => {
   try {
     // Pegando dados do request
     const { nome, email, senha, telefone, foto, tipo } = req.body;
-    
+
     // Validando dados
     if (!nome || !email || !senha || !tipo) {
       return res
@@ -59,27 +58,33 @@ export const createUsuario = async (req, res) => {
   }
 };
 
-
 // Login de um usuário
 export const loginUsuario = async (req, res) => {
   try {
     const { email, senha } = req.body;
 
     // Validando dados
-    if (!email ||!senha) {
-      return res.status(400).json({ message: "Preencha todos os campos obrigatórios!" });
+    if (!email || !senha) {
+      return res
+        .status(400)
+        .json({ message: "Preencha todos os campos obrigatórios!" });
     }
 
-     // Busca o usuário pelo email
-    const usuario = await Usuario.findOne({ email })
-    if(!usuario) {
-      return res.status(404).json({ message: "Parece que você ainda não tem uma conta. Verifique seus dados ou crie uma!" });
+    // Busca o usuário pelo email
+    const usuario = await Usuario.findOne({ email });
+    if (!usuario) {
+      return res.status(404).json({
+        message:
+          "Parece que você ainda não tem uma conta. Verifique seus dados ou crie uma!",
+      });
     }
 
     // Compara a senha informada com a senha salva no banco
-    const senhaValida = await bcrypt.compare(senha, usuario.senha)
-    if(!senhaValida) {
-      return res.status(401).json({ message: "Credenciais inválidas. Por favor, tente novamente." });
+    const senhaValida = await bcrypt.compare(senha, usuario.senha);
+    if (!senhaValida) {
+      return res.status(401).json({
+        message: "Credenciais inválidas. Por favor, tente novamente.",
+      });
     }
 
     // Gera um token JWT com as informações do usuário
@@ -92,7 +97,7 @@ export const loginUsuario = async (req, res) => {
       {
         expiresIn: "5d", // Token expira em 1 dia
       }
-    )
+    );
 
     // Retorna os dados do usuário (exceto a senha) e o token
     res.json({
@@ -103,14 +108,84 @@ export const loginUsuario = async (req, res) => {
       foto: usuario.foto,
       tipo: usuario.tipo,
       token,
-    })
-
+    });
   } catch (err) {
     // Trata erros inesperados
     console.error("Erro no login:", err);
     res.status(500).json({ message: "Erro ao fazer login" });
   }
-}
+};
 
+// Autenticar os dados do usuário e do perfil (middleware)
+export const authUsuarioPerfil = async (req, res) => {
+  try {
+    // Pegando o ID do usuário autenticado (armazenado pelo middleware)
+    const usuarioId = req.usuario.id; // Pegando apenas o ID
 
-// Buscar um usuário pelo ID
+    // Buscando o usuário no banco de dados (removendo a senha da resposta)
+    const usuario = await Usuario.findById(usuarioId).select("-senha");
+
+    // Verificando se o usuário foi encontrado
+    if (!usuario) {
+      return res.status(404).json({ message: "Usuário não encontrado!" });
+    }
+
+    // Retornando os dados do usuário
+    res.json(usuario);
+  } catch (err) {
+    console.error("Erro ao buscar perfil:", err);
+    req.status(500).json({ message: "Erro ao buscar o perfil do usuário" });
+  }
+};
+
+// Atualizar senha do usuário (middleware)
+export const updateSenhaPerfil = async (req, res) => {
+  try {
+    const usuarioId = req.usuario.id; // Pegando apenas o ID do usuário autenticado
+    const { senhaAtual, novaSenha } = req.body;
+
+    // Buscando o usuário no banco de dados
+    const usuario = await Usuario.findById(usuarioId);
+
+    // Verificando se o usuário foi encontrado
+    if (!usuario) {
+      return res.status(404).json({ message: "Usuário não encontrado!" });
+    }
+
+    // Verificar se a senha atual informada está correta
+    const senhaCorreta = await bcrypt.compare(senhaAtual, usuario.senha);
+    if (!senhaCorreta) {
+      return res.status(401).json({ message: "Senha atual inválida!" });
+    }
+
+    // Criptografando a nova senha
+    const salt = await bcrypt.genSalt(10);
+    usuario.senha = await bcrypt.hash(novaSenha, salt);
+
+    // Salvando as alterações no banco de dados
+    await usuario.save();
+
+    // Retornando uma mensagem de sucesso
+    res.status(200).json({ message: "Senha alterada com sucesso!" });
+  } catch (err) {
+    console.error("Erro ao atualizar senha:", err);
+    req.status(500).json({ message: "Erro ao atualizar a senha" });
+  }
+};
+
+// Atualizar dados do perfil do usuário (middleware)
+export const updateDadosPerfil = async (req, res) => {
+  try {
+    // Pegando o ID do usuário autenticado (armazenado pelo middleware)
+    const usuarioId = req.usuario.id; // Pegando apenas o ID do usuário autenticado
+
+    // Pegando os dados do request
+    const { nome, telefone, foto } = req.body;
+
+    // Buscando o usuário no banco de dados
+    const usuario = await Usuario.findByIdAndUpdate(usuarioId);
+  } catch (err) {
+    console.error("Erro ao atualizar dados do perfil:", err);
+    req.status(500).json({ message: "Erro ao atualizar dados do perfil" });
+  }
+};
