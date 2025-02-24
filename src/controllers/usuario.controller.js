@@ -228,5 +228,38 @@ export const updateDadosPerfil = async (req, res) => {
 };
 
 
-// Desativar conta do usuário (middleware)
+// Excluir conta do usuário (middleware)
+export const deleteContaUsuario = async (req, res) => {
+  try {
+    const usuarioId = req.usuario.id; // Pegando apenas o ID do usuário autenticado
+    const { senha } = req.body; // Extrai a senha do corpo da requisição
+    const usuario = await Usuario.findById(usuarioId) // Buscando o usuário no banco de dados
 
+    // Verificando se o campo senha foi enviado
+    if(!senha) {
+      return res.status(400).json({ message: "Por favor, preencha sua senha para confirmar a exclusão da conta" });
+    }
+
+    //verificando se o usuário existe 
+    if(!usuario) {
+      return res.status(404).json({ message: "Usuário não encontrado!" });
+    }
+
+    // Comparando a senha informada com a senha salva no banco
+    const senhaValida = await bcrypt.compare(senha, usuario.senha)
+
+    // Verificando se a senha é válida
+    if(!senhaValida) {
+      return res.status(401).json({ message: "Senha incorreta!" });
+    }
+
+    // Deletando o usuário do banco de dados
+    await Usuario.findByIdAndDelete(usuarioId)
+
+    // Retornando uma mensagem de sucesso
+    res.status(200).json({ message: "Conta excluída com sucesso!" });
+
+  } catch (err) {
+    res.status(500).json({ message: "Erro ao excluir a conta do usuário" });
+  }
+}

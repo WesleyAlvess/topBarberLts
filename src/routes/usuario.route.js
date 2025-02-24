@@ -8,6 +8,7 @@ import {
   authUsuarioPerfil,
   updateSenhaPerfil,
   updateDadosPerfil,
+  deleteContaUsuario
 } from "../controllers/usuario.controller.js";
 
 // Middleware para verificar se o token JWT está presente e válido
@@ -29,5 +30,8 @@ router.put("/alterar-senha", verificarToken, updateSenhaPerfil);
 
 // Rota para atualizar dados do perfil do usuário
 router.put("/atualizar-perfil", verificarToken, updateDadosPerfil);
+
+// Rota para deletar um usuário (cliente ou profissional)
+router.delete("/deletar", verificarToken, deleteContaUsuario)
 
 export default router;
