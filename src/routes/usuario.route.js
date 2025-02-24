@@ -28,6 +28,6 @@ router.get("/perfil", verificarToken, authUsuarioPerfil);
 router.put("/alterar-senha", verificarToken, updateSenhaPerfil);
 
 // Rota para atualizar dados do perfil do usuário
-router.put("/atualizar-perfil", updateDadosPerfil);
+router.put("/atualizar-perfil", verificarToken, updateDadosPerfil);
 
 export default router;

@@ -38,7 +38,7 @@ export const createUsuario = async (req, res) => {
     });
 
     // Salvar o novo usuário no MongoDB
-    novoUsuario.save();
+    await novoUsuario.save();
 
     // Retornar o usuário criado (sem exibir a senha)
     res.status(201).json({
@@ -50,13 +50,15 @@ export const createUsuario = async (req, res) => {
       tipo: novoUsuario.tipo, // "cliente" ou "profissional"
       status: novoUsuario.status, // "ativo"
       dataCadastro: novoUsuario.dataCadastro,
-    });
+    })
+
   } catch (err) {
     // Trata erros inesperados
     console.error("Erro ao criar usuario:", err); // Log do erro para debug
-    req.status(500).json({ message: err.message });
+    res.status(500).json({ message: err.message });
   }
 };
+
 
 // Login de um usuário
 export const loginUsuario = async (req, res) => {
@@ -108,7 +110,8 @@ export const loginUsuario = async (req, res) => {
       foto: usuario.foto,
       tipo: usuario.tipo,
       token,
-    });
+    })
+
   } catch (err) {
     // Trata erros inesperados
     console.error("Erro no login:", err);
@@ -116,7 +119,9 @@ export const loginUsuario = async (req, res) => {
   }
 };
 
+
 // Autenticar os dados do usuário e do perfil (middleware)
+//retornar os dados do perfil do usuário autenticado.
 export const authUsuarioPerfil = async (req, res) => {
   try {
     // Pegando o ID do usuário autenticado (armazenado pelo middleware)
@@ -132,17 +137,24 @@ export const authUsuarioPerfil = async (req, res) => {
 
     // Retornando os dados do usuário
     res.json(usuario);
+
   } catch (err) {
     console.error("Erro ao buscar perfil:", err);
-    req.status(500).json({ message: "Erro ao buscar o perfil do usuário" });
+    res.status(500).json({ message: "Erro ao buscar o perfil do usuário" });
   }
 };
+
 
 // Atualizar senha do usuário (middleware)
 export const updateSenhaPerfil = async (req, res) => {
   try {
     const usuarioId = req.usuario.id; // Pegando apenas o ID do usuário autenticado
-    const { senhaAtual, novaSenha } = req.body;
+    const { senhaAtual, novaSenha } = req.body; // Extrai os dados de atualização do corpo da requisição
+
+    //Verificando se a nova senha e igual a antiga
+    if(senhaAtual === novaSenha) {
+      return res.status(400).json({ message: "A nova senha não pode ser igual à senha atual!" });
+    }
 
     // Buscando o usuário no banco de dados
     const usuario = await Usuario.findById(usuarioId);
@@ -167,11 +179,13 @@ export const updateSenhaPerfil = async (req, res) => {
 
     // Retornando uma mensagem de sucesso
     res.status(200).json({ message: "Senha alterada com sucesso!" });
+
   } catch (err) {
     console.error("Erro ao atualizar senha:", err);
-    req.status(500).json({ message: "Erro ao atualizar a senha" });
+    res.status(500).json({ message: "Erro ao atualizar a senha" });
   }
 };
+
 
 // Atualizar dados do perfil do usuário (middleware)
 export const updateDadosPerfil = async (req, res) => {
@@ -182,10 +196,37 @@ export const updateDadosPerfil = async (req, res) => {
     // Pegando os dados do request
     const { nome, telefone, foto } = req.body;
 
-    // Buscando o usuário no banco de dados
-    const usuario = await Usuario.findByIdAndUpdate(usuarioId);
+    // Verificar se pelo menos um campo foi enviado
+    if (!nome && !telefone && !foto) {
+      return res.status(400).json({ message: "Preencha pelo menos um campo!" });
+    }
+
+    // Atualizando dados do usuario
+    const usuarioAtualizado = await Usuario.findByIdAndUpdate(
+      usuarioId,
+      { nome, telefone, foto }, // Campos a serem atualizados
+      { new: true, runValidators: true } // Retorna os dados atualizados e aplica validações
+    );
+
+    // Verificando se o usuário foi encontrado
+    if(!usuarioAtualizado){
+      return res.status(404).json({ message: "Usuário não encontrado!" });
+    }
+
+    // Retornando os dados do usuário atualizado
+    res.status(200).json({
+      _id: usuarioAtualizado._id,
+      nome: usuarioAtualizado.nome,
+      telefone: usuarioAtualizado.telefone,
+      foto: usuarioAtualizado.foto,
+    })
+
   } catch (err) {
     console.error("Erro ao atualizar dados do perfil:", err);
-    req.status(500).json({ message: "Erro ao atualizar dados do perfil" });
+    res.status(500).json({ message: "Erro ao atualizar dados do perfil" });
   }
 };
+
+
+// Desativar conta do usuário (middleware)
+
