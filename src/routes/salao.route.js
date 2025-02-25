@@ -1,26 +1,25 @@
 import express from 'express';
-import { createSalao, getSalao, getSalaoById, updateSalao, deleteSalao} from '../controllers/salao.controller.js';
+const router = express.Router(); // Criando um router para rotas
 
-const router = express.Router();
+// Importando controllers
+import { 
+  createSalao, getSalao, getSalaoById, updateSalao, deleteSalao 
+} from '../controllers/salao.controller.js';
 
-// Middleware para verificar se o token JWT está presente e válido
-import { verificarToken } from '../middlewares/autenticacao.middleware.js';
-
-// Rota para listar todos os salões
-router.get('/', getSalao) // Qualquer um pode visualizar os salões
-
-// Rota para buscar um salão por ID
-router. get('/:id', getSalaoById) // Qualquer um pode buscar um salão
+import { verificarToken } from '../middlewares/autenticacao.middleware.js'; // Middleware para verificar se o token JWT está presente e válido
+import { verificaDono } from '../middlewares/verificaDono.js';  // Middleware para verificar se o usuário é dono do salão
+import Salao from '../models/salao.model.js' // Importando modelo Salao
 
 
-// 🔒 Rota protegida - apenas usuários autenticados podem acessar
-// Rota para criar um novo salão
-router.post('/', verificarToken, createSalao) // Apenas usuários autenticados podem criar um salão
+// 🔓 Rotas públicas (qualquer um pode acessar)
+router.get('/', getSalao);
+router.get('/:id', getSalaoById);
 
-// Rota para atualizar um salão
-router.put('/:id', verificarToken, updateSalao) // O usuário precisa estar autenticado e ser o dono do salão
+// 🔒 Rotas protegidas (apenas usuários autenticados podem acessar)
+router.post('/', verificarToken, createSalao);
 
-// Rota para deletar um salão
-router.delete('/:id', verificarToken, deleteSalao) // Só o dono pode deletar o salã
+// 🔒 Rotas protegidas com verificação de propriedade (apenas donos do salão podem alterar dados)
+router.patch('/:id', verificarToken, verificaDono(Salao), updateSalao);
+router.delete('/:id', verificarToken, verificaDono(Salao), deleteSalao);
 
 export default router;

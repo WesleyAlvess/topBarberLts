@@ -97,7 +97,7 @@ export const loginUsuario = async (req, res) => {
       },
       process.env.JWT_SECRET, // Chave secreta do JWT
       {
-        expiresIn: "5d", // Token expira em 1 dia
+        expiresIn: "7d", // Token expira em 1 dia
       }
     );
 

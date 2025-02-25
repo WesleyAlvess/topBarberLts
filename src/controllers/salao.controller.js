@@ -1,4 +1,5 @@
 // Importando o modelo Salao
+import mongoose from "mongoose";
 import Salao from "../models/salao.model.js";
 
 
@@ -6,23 +7,23 @@ import Salao from "../models/salao.model.js";
 export const createSalao = async (req, res) => {
   try {
     // Pegando dados do request
-    const { nome, dono, endereco,} = req.body;
+    const { nome, endereco,} = req.body;
 
     // Validando dados do request
-    if ( !nome ||!dono ||!endereco ) {
+    if ( !nome ||!endereco ) {
       return res.status(400).json({ error: "Todos os campos são obrigatórios!" });
     }
 
-    // Verificando se o dono existe
-    const donoExiste = await Salao.findOne({ nome });
-    if(donoExiste) {
+    // // Verificando se já existe um salão com esse nome
+    const salaoExiste = await Salao.findOne({ nome });
+    if(salaoExiste) {
       return res.status(400).json({ error: "Já existe um salão com esse nome!" });
     }
 
     // Criando um novo salão
     const newSalao = new Salao({
       nome,
-      dono,
+      dono: req.usuario.id,
       endereco,
     })
 
@@ -92,43 +93,42 @@ export const getSalaoById = async (req, res) => {
 export const updateSalao = async (req, res) => {
   try {
     const { id } = req.params // Extrai o ID dos parâmetros da requisição
-    const atualizaDados = req.body // Extrai os dados de atualização do corpo da requisição
+    const {nome, endereco, servicos} = req.body // Extrai os dados de atualização do corpo da requisição
+    
 
     // Verificando se o ID é válido
     if ( !id ) {
-      return res.status(400).json({ message: "ID do salão não fornecido!" })
+      return res.status(400).json({ message: "ID do salão inválido ou não fornecido!" })
     }
 
-    // Verificando se os dados de atualização são válidos
-    if (Object.keys(atualizaDados).length === 0) {
-      return res.status(400).json({ message: "Nenhum dado de atualização fornecido!" })
-    }
-    // Buscando o salão pelo ID no MongoDB
+    // Buscando o salão no banco de dados e verificando se o salão existe
     const salao = await Salao.findById(id)
-
-    // Verificando se o salão foi encontrado
     if (!salao) {
-      res.status(404).json({ message: "Salão não encontrado!" })
+      return res.status(404).json({ message: "Salão não encontrado!" })
     }
 
-    // Atualizando os dados do salão
-    Object.keys(atualizaDados).forEach((key) => {
-      salao[key] = atualizaDados[key] // Atualiza apenas os campos enviados
-    })
+      // Verificando se os dados de atualização são os mesmos que já existem no banco de dados
+      if(nome === salao.nome) {
+        return res.status(400).json({ message: "Esse nome ja está em uso!" })
+      }
 
-    // Salvando as alterações no MongoDB
+    // Atualizando somente os campos informados pelo usuário
+    if(nome) salao.nome = nome
+    if(endereco) salao.endereco = endereco
+    if(servicos) salao.servicos = servicos
+
+    // Salvando as alterações no banco de dados
     await salao.save()
 
     // Retorna o salão atualizado
     res.status(200).json({
-      message: "Salão atualizado com sucesso!",
-      data: salao,
+      data: salao
     })
 
   } catch (err) {
     // Trata erros inesperados
-    console.error("Erro ao atualizar salão:", err); // Log do erro para debug
-    return res.status(500).json({ error: err.message });
+    console.error("Erro ao atualizar salão:", err)
+    return res.status(500).json({ message: "Erro interno do servidor ao atualizar salão." })
   }
 }
 
@@ -139,20 +139,17 @@ export const deleteSalao = async (req, res) => {
     const {id} = req.params // Extrai o ID dos parâmetros da requisição
 
     // Verificando se o ID é válido
-    if (!id) {
-      return res.status(400).json({ message: "ID do salão não fornecido!" })
+    if (!id || !mongoose.Types.ObjectId.isValid(id)) {
+      return res.status(400).json({ message: "ID do salão inválido ou não fornecido!" });
     }
 
-    // Buscando o salão pelo ID no MongoDB
-    const salao = await Salao.findById(id)
+    // Buscando e deletando o salão pelo ID no MongoDB
+    const salao = await Salao.findByIdAndDelete(id)
 
-    // Verificando se o salão foi encontrado
+   // Verificando se o salão foi encontrado e deletado
     if (!salao) {
-      res.status(404).json({ message: "Salão não encontrado!" })
+      return res.status(404).json({ message: "Salão não encontrado!" })
     }
-
-    // Deletando o salão do MongoDB
-    await salao.delete()
 
     // Retorna uma resposta de sucesso
     res.status(200).json({ message: "Salão deletado com sucesso!" })

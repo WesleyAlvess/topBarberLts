@@ -13,12 +13,11 @@ export const verificarToken = (req, res, next) => {
     }
 
     // Verifica e decodifica o token
-    const decodificandoToken = jwt.verify(token.split(" ")[1], process.env.JWT_SECRET)
-
-    
+    const decodificandoToken = jwt.verify(token.split(" ")[1], process.env.JWT_SECRET)  
     
     // Adiciona os dados do usuário ao request para que possam ser acessados em outras rotas protegidas
     req.usuario = decodificandoToken
+    
 
     next(); // Passa para o próximo middleware ou rota
 
