@@ -6,20 +6,24 @@ import Salao from "../models/salao.model.js";
 export const createSalao = async (req, res) => {
   try {
     // Pegando dados do request
-    const { nome, localizacao, telefone, servicos, horario } = req.body;
+    const { nome, dono, endereco,} = req.body;
 
     // Validando dados do request
-    if (!nome ||!localizacao ||!telefone ||!servicos ||!horario) {
+    if ( !nome ||!dono ||!endereco ) {
       return res.status(400).json({ error: "Todos os campos são obrigatórios!" });
+    }
+
+    // Verificando se o dono existe
+    const donoExiste = await Salao.findOne({ nome });
+    if(donoExiste) {
+      return res.status(400).json({ error: "Já existe um salão com esse nome!" });
     }
 
     // Criando um novo salão
     const newSalao = new Salao({
       nome,
-      localizacao,
-      telefone,
-      servicos,
-      horario,
+      dono,
+      endereco,
     })
 
     // Salvando o novo salão no MongoDB
@@ -27,24 +31,22 @@ export const createSalao = async (req, res) => {
 
     // Retornando o salão criado
     res.status(201).json({
-      message: "Salão criado com sucesso!",
       data: newSalao,
     });
 
 
   } catch (err) {
     // Trata erros inesperados
-    console.error("Erro ao criar salão:", err); // Log do erro para debug
-    return res.status(500).json({ error: err.message });
+    console.error("Erro ao criar salão:", err);
+    res.status(500).json({ error: "Erro interno no servidor." });
   }
 };
 
 // Listar todos os salões
 export const getSalao = async (req, res) => {
   try {
-    const listarSalao = await Salaolao.find()
+    const listarSalao = await Salao.find()
     res.status(200).json({
-      message: "Listando todos os salões",
       data: listarSalao,
     })
   } catch (err) {
@@ -58,24 +60,23 @@ export const getSalao = async (req, res) => {
 export const getSalaoById = async (req, res) => {
   try {
     // Pegando o ID do salão
-    const { id } = req. params // Extrai o ID dos parâmetros da requisição
+    const { id } = req.params // Extrai o ID dos parâmetros da requisição
     
     // Verificando se o ID é válido
     if (!id) {
       return res.status(400).json({ message: "ID do salão não fornecido!" })
     }
-
+    
     // Buscando o salão pelo ID no MongoDB
     const salao = await Salao.findById(id)
 
     // Verificando se o salão foi encontrado
     if (!salao) {
-      res.status(404).json({ message: "Salão não encontrado!" })
+      return res.status(404).json({ message: "Salão não encontrado!" })
     }
 
     // Retorna o salão encontrado
     res.status(200).json({
-      message: "Listando o salão",
       data: salao,
     });
 
