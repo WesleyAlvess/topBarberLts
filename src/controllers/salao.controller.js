@@ -1,13 +1,19 @@
 // Importando o modelo Salao
 import mongoose from "mongoose";
+
+// Importando o modelo Salao
 import Salao from "../models/salao.model.js";
+
+// Importando o modelo Usuario
+import Usuario from "../models/usuario.model.js"
 
 
 // Criar um salão
 export const createSalao = async (req, res) => {
   try {
     // Pegando dados do request
-    const { nome, endereco,} = req.body;
+    const { nome, endereco,} = req.body; // Extrai os dados do corpo da requisição
+    const donoId = req.usuario.id; // Pegando ID do usuário autenticado (vem do middleware de autenticação)
 
     // Validando dados do request
     if ( !nome ||!endereco ) {
@@ -23,9 +29,12 @@ export const createSalao = async (req, res) => {
     // Criando um novo salão
     const newSalao = new Salao({
       nome,
-      dono: req.usuario.id,
       endereco,
+      dono: donoId, // Define o dono como o usuário autenticado
     })
+
+    // Atualizando o tipo de usuario para "profissional"
+    await Usuario.findByIdAndUpdate(donoId, { tipo: "profissional" });
 
     // Salvando o novo salão no MongoDB
     await newSalao.save();

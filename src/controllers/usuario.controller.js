@@ -6,10 +6,10 @@ import jwt from "jsonwebtoken";
 export const createUsuario = async (req, res) => {
   try {
     // Pegando dados do request
-    const { nome, email, senha, telefone, foto, tipo } = req.body;
+    const { nome, email, senha, telefone, foto, } = req.body;
 
     // Validando dados
-    if (!nome || !email || !senha || !tipo) {
+    if (!nome || !email || !senha) {
       return res
         .status(400)
         .json({ message: "Preencha todos os campos obrigatórios!" });
@@ -34,7 +34,7 @@ export const createUsuario = async (req, res) => {
       senha: senhaCriptografada, // Armazena a senha já criptografada
       telefone,
       foto,
-      tipo, // "cliente" ou "profissional"
+      tipo: "cliente", // Sempre começa como cliente
     });
 
     // Salvar o novo usuário no MongoDB
@@ -47,7 +47,7 @@ export const createUsuario = async (req, res) => {
       email: novoUsuario.email,
       telefone: novoUsuario.telefone,
       foto: novoUsuario.foto,
-      tipo: novoUsuario.tipo, // "cliente" ou "profissional"
+      tipo: novoUsuario.tipo, // "cliente"
       status: novoUsuario.status, // "ativo"
       dataCadastro: novoUsuario.dataCadastro,
     })
@@ -148,7 +148,7 @@ export const authUsuarioPerfil = async (req, res) => {
 // Atualizar senha do usuário (middleware)
 export const updateSenhaPerfil = async (req, res) => {
   try {
-    const usuarioId = req.usuario.id; // Pegando apenas o ID do usuário autenticado
+    const usuarioId = req.params.id; // Pegando apenas o ID do usuário autenticado
     const { senhaAtual, novaSenha } = req.body; // Extrai os dados de atualização do corpo da requisição
 
     //Verificando se a nova senha e igual a antiga

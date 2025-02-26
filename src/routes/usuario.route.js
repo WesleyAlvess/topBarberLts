@@ -14,24 +14,26 @@ import {
 // Middleware para verificar se o token JWT está presente e válido
 import { verificarToken } from "../middlewares/autenticacao.middleware.js";
 
-// Rota para criar um novo usuário (cliente ou profissional)
-router.post("/", createUsuario);
+// Middleware para verificar se o usuário é dono do recurso
+import { verificaDono } from "../middlewares/verificaDono.js";
 
-// Rota para login do usuário
-router.post("/login", loginUsuario);
+// Importando models
+import Usuario from "../models/usuario.model.js"
+
+
+// 🔓 Rotas públicas (não precisam de autenticação)
+router.post("/", createUsuario); // Criar um novo usuário (cliente)
+router.post("/login", loginUsuario); // Login do usuário
+
 
 // 🔒 Rota protegida - apenas usuários autenticados podem acessar
+router.get("/perfil", verificarToken, authUsuarioPerfil); // Buscar dados do perfil
 
-// Rota para buscar o perfil do usuário
-router.get("/perfil", verificarToken, authUsuarioPerfil);
+// Atualizações de dados
+router.put("/alterar-senha/:id", verificarToken, verificaDono(Usuario), updateSenhaPerfil); // Atualizar senha
+router.patch("/atualizar-perfil", verificarToken, verificaDono(Usuario), updateDadosPerfil); // Atualizar dados do perfil
 
-// Rota para atualizar a senha do usuário
-router.put("/alterar-senha", verificarToken, updateSenhaPerfil);
-
-// Rota para atualizar dados do perfil do usuário
-router.put("/atualizar-perfil", verificarToken, updateDadosPerfil);
-
-// Rota para deletar um usuário (cliente ou profissional)
-router.delete("/deletar", verificarToken, deleteContaUsuario)
+// Exclusão de conta
+router.delete("/deletar", verificarToken, verificaDono(Usuario), deleteContaUsuario); // Deletar usuário
 
 export default router;

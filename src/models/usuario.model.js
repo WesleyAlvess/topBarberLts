@@ -21,11 +21,12 @@ const usuarioSchema = new mongoose.Schema({
   },
   foto: {
     type: String,
+    default: "https://www.gravatar.com/avatar/" // Imagem Gravatar padrão
   },
   tipo: {
     type: String,
     enum: ["cliente", "profissional"], // Diferencia cliente de profissional
-    required: true,
+    default: "cliente" // Todo mundo começa como cliente automaticamente
   },
   status: {
     type: String,
