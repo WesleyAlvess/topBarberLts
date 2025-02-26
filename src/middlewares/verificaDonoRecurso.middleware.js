@@ -1,13 +1,10 @@
 
 
-export const verificaDono = (model, campoDono = 'dono') => {
+export const verificaDonoRecurso = (model, campoDono = 'dono') => {
   return async (req, res, next) => {
     try {
       // Pega o ID do recurso que queremos modificar.
       const recurso = await model.findById(req.params.id)
-
-      console.log(recurso);
-      
 
       // Verifica se o recurso existe.
       if(!recurso) {

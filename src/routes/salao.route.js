@@ -7,7 +7,7 @@ import {
 } from '../controllers/salao.controller.js';
 
 import { verificarToken } from '../middlewares/autenticacao.middleware.js'; // Middleware para verificar se o token JWT está presente e válido
-import { verificaDono } from '../middlewares/verificaDono.js';  // Middleware para verificar se o usuário é dono do salão
+import { verificaDonoRecurso } from '../middlewares/verificaDonoRecurso.middleware.js';  // Middleware para verificar se o usuário é dono do salão
 import Salao from '../models/salao.model.js' // Importando modelo Salao
 
 
@@ -19,7 +19,8 @@ router.get('/:id', getSalaoById);
 router.post('/', verificarToken, createSalao);
 
 // 🔒 Rotas protegidas com verificação de propriedade (apenas donos do salão podem alterar dados)
-router.patch('/:id', verificarToken, verificaDono(Salao), updateSalao);
-router.delete('/:id', verificarToken, verificaDono(Salao), deleteSalao);
+router.patch('/:id', verificarToken, verificaDonoRecurso(Salao), updateSalao);
+router.delete('/:id', verificarToken, verificaDonoRecurso(Salao), deleteSalao);
 
 export default router;
+  

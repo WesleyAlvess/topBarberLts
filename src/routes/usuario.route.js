@@ -15,7 +15,7 @@ import {
 import { verificarToken } from "../middlewares/autenticacao.middleware.js";
 
 // Middleware para verificar se o usuário é dono do recurso
-import { verificaDono } from "../middlewares/verificaDono.js";
+import { verificaDonoPerfil } from "../middlewares/verificaDonoPerfil.middleware.js";
 
 // Importando models
 import Usuario from "../models/usuario.model.js"
@@ -30,10 +30,10 @@ router.post("/login", loginUsuario); // Login do usuário
 router.get("/perfil", verificarToken, authUsuarioPerfil); // Buscar dados do perfil
 
 // Atualizações de dados
-router.put("/alterar-senha/:id", verificarToken, verificaDono(Usuario), updateSenhaPerfil); // Atualizar senha
-router.patch("/atualizar-perfil", verificarToken, verificaDono(Usuario), updateDadosPerfil); // Atualizar dados do perfil
+router.put("/alterar-senha/:id", verificarToken, verificaDonoPerfil, updateSenhaPerfil); // Atualizar senha
+router.patch("/atualizar-perfil", verificarToken, verificaDonoPerfil, updateDadosPerfil); // Atualizar dados do perfil
 
 // Exclusão de conta
-router.delete("/deletar", verificarToken, verificaDono(Usuario), deleteContaUsuario); // Deletar usuário
+router.delete("/deletar", verificarToken, verificaDonoPerfil, deleteContaUsuario); // Deletar usuário
 
 export default router;
