@@ -148,8 +148,9 @@ export const authUsuarioPerfil = async (req, res) => {
 // Atualizar senha do usuário (middleware)
 export const updateSenhaPerfil = async (req, res) => {
   try {
-    const usuarioId = req.params.id; // Pegando apenas o ID do usuário autenticado
+    const usuarioId = req.usuario.id; // Pegando apenas o ID do usuário autenticado
     const { senhaAtual, novaSenha } = req.body; // Extrai os dados de atualização do corpo da requisição
+
 
     //Verificando se a nova senha e igual a antiga
     if(senhaAtual === novaSenha) {

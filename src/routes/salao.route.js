@@ -12,15 +12,15 @@ import Salao from '../models/salao.model.js' // Importando modelo Salao
 
 
 // 🔓 Rotas públicas (qualquer um pode acessar)
-router.get('/', getSalao);
-router.get('/:id', getSalaoById);
+router.get('/', getSalao); // Listar todos os salões
+router.get('/:id', getSalaoById); // Listar um salão específico
 
 // 🔒 Rotas protegidas (apenas usuários autenticados podem acessar)
-router.post('/', verificarToken, createSalao);
+router.post('/', verificarToken, createSalao); // Criar um novo salão
 
 // 🔒 Rotas protegidas com verificação de propriedade (apenas donos do salão podem alterar dados)
-router.patch('/:id', verificarToken, verificaDonoRecurso(Salao), updateSalao);
-router.delete('/:id', verificarToken, verificaDonoRecurso(Salao), deleteSalao);
+router.patch('/:id', verificarToken, verificaDonoRecurso(Salao), updateSalao); // Atualizar dados do salão
+router.delete('/:id', verificarToken, verificaDonoRecurso(Salao), deleteSalao); // Deletar salão
 
 export default router;
   
