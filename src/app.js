@@ -3,8 +3,11 @@ import express from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
 import connectDB from './configs/database.js';
-import salaoRouter from './routes/salao.route.js'
-import Usuario from './routes/usuario.route.js'
+
+// Importando Rotas
+import SalaoRouter from './routes/salao.route.js'
+import UsuarioRouter from './routes/usuario.route.js'
+import ServicoRouter from './routes/servico.route.js'
 
 dotenv.config();
 connectDB();
@@ -17,10 +20,13 @@ app.use(cors());
 
 // Rotas
 // Rotas para salões
-app.use('/api', salaoRouter);
+app.use('/api', SalaoRouter);
 
 // Rotas para usuários
-app.use('/api/user', Usuario);
+app.use('/api/user', UsuarioRouter);
+
+// Rotas para serviços
+app.use('/api/services', ServicoRouter);
 
 
 // Iniciar servidor

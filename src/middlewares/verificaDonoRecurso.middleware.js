@@ -1,18 +1,26 @@
 
 
-export const verificaDonoRecurso = (model, campoDono = 'dono') => {
+export const verificaDonoRecurso = (model) => {
   return async (req, res, next) => {
     try {
       // Pega o ID do recurso que queremos modificar.
-      const recurso = await model.findById(req.params.id)
+      const recursoId = req.params.salaoId || req.params.id
 
       // Verifica se o recurso existe.
-      if(!recurso) {
+      if(!recursoId) {
         return res.status(404).json({ message: 'Recurso não encontrado' });
       }
 
+      console.log(recursoId); // debug.log
+      
+      // Pega o recurso correto no banco de dados
+      const recursoDb = await model.findById(recursoId)
+
+      // Detecta dinamicamente se o dono é "usuario" ou "dono"
+      const campoDono = recursoDb.usuario ? "usuario" : "dono"
+
       // Verifica se o usuário autenticado é o dono do recurso
-      if(recurso[campoDono].toString() !== req.usuario.id.toString()) {
+      if(recursoDb[campoDono].toString() !== req.usuario.id.toString()) {
         return res.status(403).json({ message: 'Acesso negado! Você não é o dono deste recurso' });
       }
 

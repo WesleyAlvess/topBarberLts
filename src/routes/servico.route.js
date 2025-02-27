@@ -1,18 +1,35 @@
-// import express from "express";
-// import { createService, getServicesBySalon, updateService, deleteService } from "../controllers/serviceController.js";
+import express from 'express';
+const router = express.Router()
 
-// const router = express.Router();
+// Importando models
+import Salao from '../models/salao.model.js' // Importando modelo Salao
 
-// // Rota para criar um novo serviço
-// router.post("/servico", createService);
+// Importando controllers
+import {
+  createServico,
+  // getServicos,
+  // getServicoById,
+  // updateServico,
+  // deleteServico,
+} from '../controllers/servico.controller.js'
 
-// // Rota para listar serviços de um salão específico
-// router.get("/:salaoId", getServicesBySalon);
+// Middleware para verificar se o token JWT está presente e válido
+import { verificarToken } from "../middlewares/autenticacao.middleware.js";
 
-// // Rota para atualizar um serviço existente
-// router.put("/:id", updateService);
+// Middleware para verificar se o usuário é dono do salão
+import { verificaDonoRecurso } from "../middlewares/verificaDonoRecurso.middleware.js";
 
-// // Rota para deletar um serviço
-// router.delete("/:id", deleteService);
+// 🔓 Rotas públicas
+// router.get("/:salaoId", getServicos); // Listar serviços de um salão
+// router.get("/:salaoId/:id", getServicoById); // Listar um serviço específico
+// router.get("/:salaoId/horarios", getHorarios); // Listar horários disponíveis do salão
 
-// export default router;
+// // 🔒 Rotas protegidas (apenas donos do salão podem gerenciar serviços e horários)
+router.post("/:salaoId", verificarToken, verificaDonoRecurso(Salao), createServico); // Criar serviço
+// router.patch("/:salaoId/:id", verificarToken, verificaDonoRecurso(Salao), updateServico); // Atualizar serviço
+// router.delete("/:salaoId/:id", verificarToken, verificaDonoRecurso(Salao), deleteServico); // Deletar serviço
+
+// router.post("/:salaoId/horarios", verificarToken, verificaDonoRecurso(Salao), createHorario); // Criar horário
+// router.delete("/:salaoId/horarios/:id", verificarToken, verificaDonoRecurso(Salao), deleteHorario); // Remover horário
+
+export default router;
