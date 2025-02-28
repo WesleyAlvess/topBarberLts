@@ -7,7 +7,7 @@ import Salao from '../models/salao.model.js' // Importando modelo Salao
 // Importando controllers
 import {
   createServico,
-  // getServicos,
+  getServicos,
   // getServicoById,
   // updateServico,
   // deleteServico,
@@ -20,7 +20,7 @@ import { verificarToken } from "../middlewares/autenticacao.middleware.js";
 import { verificaDonoRecurso } from "../middlewares/verificaDonoRecurso.middleware.js";
 
 // 🔓 Rotas públicas
-// router.get("/:salaoId", getServicos); // Listar serviços de um salão
+router.get("/:salaoId", getServicos); // Listar serviços de um salão
 // router.get("/:salaoId/:id", getServicoById); // Listar um serviço específico
 // router.get("/:salaoId/horarios", getHorarios); // Listar horários disponíveis do salão
 
