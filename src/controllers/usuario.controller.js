@@ -59,7 +59,6 @@ export const createUsuario = async (req, res) => {
   }
 };
 
-
 // Login de um usuário
 export const loginUsuario = async (req, res) => {
   try {
@@ -119,7 +118,6 @@ export const loginUsuario = async (req, res) => {
   }
 };
 
-
 // Autenticar os dados do usuário e do perfil (middleware)
 //retornar os dados do perfil do usuário autenticado.
 export const authUsuarioPerfil = async (req, res) => {
@@ -143,7 +141,6 @@ export const authUsuarioPerfil = async (req, res) => {
     res.status(500).json({ message: "Erro ao buscar o perfil do usuário" });
   }
 };
-
 
 // Atualizar senha do usuário (middleware)
 export const updateSenhaPerfil = async (req, res) => {
@@ -186,7 +183,6 @@ export const updateSenhaPerfil = async (req, res) => {
     res.status(500).json({ message: "Erro ao atualizar a senha" });
   }
 };
-
 
 // Atualizar dados do perfil do usuário (middleware)
 export const updateDadosPerfil = async (req, res) => {

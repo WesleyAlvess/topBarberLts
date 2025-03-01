@@ -1,16 +1,32 @@
-// // routes/scheduleRoutes.js
-// import express from "express";
-// import { createSchedule, getSchedulesByUser, updateSchedule, deleteSchedule } from "../controllers/scheduleController.js";
+import express from 'express';
+const router = express.Router();
 
-// const router = express.Router();
+// Importando models
+import Horario from '../models/horario.model.js';
+import Salao from '../models/salao.model.js';
 
-// // Rota para criar um novo horário disponível
-// router.post("/", createSchedule);
-// // Rota para listar horários disponíveis de um salão
-// router.get("/:salaoId", getSchedulesByUser);
-// // Rota para atualizar um horário
-// router.put("/:id", updateSchedule);
-// // Rota para deletar um horário
-// router.delete("/:id", deleteSchedule);
+// Importando controllers
+import {
+  getHorarios,
+  getHorariosPorColaborador,
+  createHorario,
+  updateHorario,
+  deleteHorario,
+} from '../controllers/horario.controller.js';
 
-// export default router;
+// Middleware para verificar se o token JWT está presente e válido
+import { verificarToken } from '../middlewares/autenticacao.middleware.js';
+
+// Middleware para verificar se o usuário é dono do salão
+import { verificaDonoRecurso } from '../middlewares/verificaDonoRecurso.middleware.js';
+
+// 🔓 Rotas públicas
+router.get('/:salaoId', getHorarios); // Listar horários do salão
+router.get('/:salaoId/:colaboradorId', getHorariosPorColaborador); // Listar horários de um profissional
+
+// // 🔒 Rotas protegidas (apenas donos do salão podem gerenciar horários)
+router.post('/:salaoId', verificarToken, verificaDonoRecurso(Salao), createHorario); // Criar horário
+router.patch('/:salaoId/:id', verificarToken, verificaDonoRecurso(Salao), updateHorario); // Atualizar horário
+router.delete('/:salaoId/:id', verificarToken, verificaDonoRecurso(Salao), deleteHorario); // Deletar horário
+
+export default router;

@@ -9,9 +9,6 @@ import Salao from '../models/salao.model.js'
       const { salaoId } = req.params // Pegando o ID do salão da URL
       const {titulo, preco, duracao} = req.body // Pegando os dados do serviço
 
-      console.log(salaoId);
-      
-
       // Verifica se o salão existe
       const salao = await Salao.findById(salaoId)
       if(!salao) {
@@ -29,7 +26,15 @@ import Salao from '../models/salao.model.js'
       await novoServico.save() // Salva no banco de dados
 
       // Retorna o serviço criado
-      res.status(201).json(novoServico)
+      res.status(201).json({
+        id: novoHorario._id,
+        salao: novoHorario.salao,
+        colaborador: novoHorario.colaborador,
+        dias: novoHorario.dias,
+        inicio: novoHorario.inicio,
+        fim: novoHorario.fim,
+        dataCadastro: novoHorario.dataCadastro
+      })
 
 
     } catch (err) {
@@ -43,7 +48,7 @@ import Salao from '../models/salao.model.js'
       // Busca todos os serviços no banco
       const servicos = await Servico.find().populate('salao', 'nome endereco').sort({dataCadastro: 1 })
 
-      res.status(200).json({ data: servicos }); // Retorna os dados
+      res.status(200).json(servicos); // Retorna os dados
 
     } catch (err) {
       // Trata erros inesperados
@@ -74,7 +79,7 @@ import Salao from '../models/salao.model.js'
       }
 
       // Retorna o serviço encontrado
-      res.status(200).json({ data: servico });
+      res.status(200).json(servico);
 
     } catch (err) {
       console.log("Erro ao buscar serviço:", err);
@@ -87,6 +92,11 @@ import Salao from '../models/salao.model.js'
     try {
       const { salaoId, id } = req.params // Pega o ID do serviço da URL
       const { titulo, preco, duracao } = req.body // Pega os dados do serviço
+
+      // Verifica se existe capos vazios
+      if (!titulo || !preco || !duracao) {
+        return res.status(400).json({ message: "Preencha todos os campos" });
+      }
 
       // Verifica se o ID é válido
       if (!mongoose.Types.ObjectId.isValid(salaoId) || !mongoose.Types.ObjectId.isValid(id)) {
@@ -118,7 +128,7 @@ import Salao from '../models/salao.model.js'
       } 
 
       // Retorna o serviço atualizado
-      res.status(200).json({ data: servicoAtualizado });
+      res.status(200).json(servicoAtualizado);
 
     } catch (err) {
       res.status(500).json({ error: err.message });

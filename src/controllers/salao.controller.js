@@ -40,9 +40,7 @@ export const createSalao = async (req, res) => {
     await newSalao.save();
 
     // Retornando o salão criado
-    res.status(201).json({
-      data: newSalao,
-    });
+    res.status(201).json(newSalao);
 
 
   } catch (err) {
@@ -55,10 +53,12 @@ export const createSalao = async (req, res) => {
 // Listar todos os salões
 export const getSalao = async (req, res) => {
   try {
+    // Busca todos os salões no banco
     const listarSalao = await Salao.find()
-    res.status(200).json({
-      data: listarSalao,
-    })
+
+    // Retorna a lista de salões
+    res.status(200).json(listarSalao)
+
   } catch (err) {
     // Trata erros inesperados
     console.error("Erro ao listar salões:", err); // Log do erro para debug
@@ -86,9 +86,7 @@ export const getSalaoById = async (req, res) => {
     }
 
     // Retorna o salão encontrado
-    res.status(200).json({
-      data: salao,
-    });
+    res.status(200).json(salao);
 
   } catch (err) {
     // Trata erros inesperados
@@ -130,9 +128,7 @@ export const updateSalao = async (req, res) => {
     await salao.save()
 
     // Retorna o salão atualizado
-    res.status(200).json({
-      data: salao
-    })
+    res.status(200).json(salao)
 
   } catch (err) {
     // Trata erros inesperados
