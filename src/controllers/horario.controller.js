@@ -1,4 +1,5 @@
 import Horario from '../models/horario.model.js'
+import mongoose from 'mongoose';
 
 // Criando Horário
 export const createHorario = async (req, res) => {
@@ -40,7 +41,7 @@ export const createHorario = async (req, res) => {
 
 
 // Listando Horários
-export const getHorarios = async (req, res) => {
+export const getHorario = async (req, res) => {
   try {
     const { salaoId } = req.params; // Pega o ID do salão da URL
 
@@ -60,40 +61,10 @@ export const getHorarios = async (req, res) => {
 }
 
 
-// Listando Horários por Colaborador
-export const getHorariosPorColaborador = async (req, res) => {
-  try {
-    const { salaoId, colaboradorId } = req.params; // Pega o ID do salão e do colaborador da URL
-
-    // Verifica se os IDs são válidos
-    if(!salaoId || !colaboradorId) {
-      return res.status(400).json({ message: "ID do salão ou do colaborador não fornecido!" });
-    }
-
-    // Busca os horários do colaborador no salão
-    const horario = await Horario.find({
-      salao: salaoId,
-      colaborador: colaboradorId,
-    })
-
-    // Verifica se o horário foi encontrado
-    if(!horario) {
-      return res.status(404).json({ message: "Horário não encontrado!" });
-    }
-
-    return res.status(200).json(horario); // Retorna o horário 
-
-  } catch (err) {
-    return res.status(500).json({ mensagem: "Erro ao buscar horários do profissional", err });
-  }
-}
-
-
 // Atualizar Horário
 export const updateHorario = async (req, res) => {
   try {
-    const { salaoId, id } = req.params; // Pegando SalaoId da url da requisição
-    const colaboradorUsuario = req.usuario.id //Pega o colaborador/usuario do objeto da requisição
+    const { salaoId, id } = req.params; // Pegando os IDs do Salão e do Horário
     const { dias, inicio, fim } = req.body; // Pegando os dados do corpo da requisição
 
     // Verifica se os campos estão vazios
@@ -105,9 +76,8 @@ export const updateHorario = async (req, res) => {
     const horarioAtualizado = await Horario.findByIdAndUpdate(
       // Condição de busca
       {
-      _id: id,
-      salao: salaoId,
-      colaborador: colaboradorUsuario,
+      _id: id, // ID do horário
+      salao: salaoId, // ID do salão
       },
       // Novos valores
       {
@@ -130,16 +100,37 @@ export const updateHorario = async (req, res) => {
     return res.status(200).json(horarioAtualizado);
 
   } catch (err) {
-    return res.status(500).json({ mensagem: "Erro ao atualizar horário", err });
+    console.error("Erro ao atualizar horário:", err);
+    return res.status(500).json({ mensagem: "Erro ao atualizar horário", erro: err.message });
   }
 }
 
 
-// Deletando Horário
+// Deletar Horário
 export const deleteHorario = async (req, res) => {
   try {
-    const { salaoId } = req.params;
+    const { salaoId, id } = req.params; // Pegando Ids do salão e do horário
+
+    // Verifica se os IDs são válidos
+    if (!mongoose.Types.ObjectId.isValid(salaoId) || !mongoose.Types.ObjectId.isValid(id)) {
+      return res.status(400).json({ message: "IDs inválidos" });
+    }
+
+    // Verifica se o horário pertence ao salão correto e o deleta
+    const horarioDeletado = await Horario.findOneAndDelete({
+      _id: id,
+      salao: salaoId,
+    });
+
+    // Verifica se o horário foi encontrado
+    if (!horarioDeletado) {
+      return res.status(404).json({ message: "Horário não encontrado!" });
+    }
+
+    return res.status(200).json({ message: "Horário deletado com sucesso!" });
+
   } catch (err) {
-    return res.status(500).json({ mensagem: "Erro ao criar horário", err });
+    console.error("Erro ao deletar horário:", err);
+    return res.status(500).json({ mensagem: "Erro ao deletar horário", erro: err.message });
   }
-}
+};

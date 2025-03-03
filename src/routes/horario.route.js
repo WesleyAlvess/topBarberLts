@@ -7,8 +7,7 @@ import Salao from '../models/salao.model.js';
 
 // Importando controllers
 import {
-  getHorarios,
-  getHorariosPorColaborador,
+  getHorario,
   createHorario,
   updateHorario,
   deleteHorario,
@@ -21,8 +20,7 @@ import { verificarToken } from '../middlewares/autenticacao.middleware.js';
 import { verificaDonoRecurso } from '../middlewares/verificaDonoRecurso.middleware.js';
 
 // 🔓 Rotas públicas
-router.get('/:salaoId', getHorarios); // Listar horários do salão
-router.get('/:salaoId/:colaboradorId', getHorariosPorColaborador); // Listar horários de um profissional
+router.get('/:salaoId', getHorario); // Listar horários do salão
 
 // // 🔒 Rotas protegidas (apenas donos do salão podem gerenciar horários)
 router.post('/:salaoId', verificarToken, verificaDonoRecurso(Salao), createHorario); // Criar horário

@@ -35,9 +35,12 @@ import Salao from '../models/salao.model.js'
         preco,
         duracao,
         salao: salao._id, // Associando o salão ao serviço
-      }).populate('salao', 'nome endereco')
+      })
 
       await novoServico.save() // Salva no banco de dados
+
+      // Popula o campo 'salao' antes de enviar a resposta
+      await novoServico.populate("salao", "nome endereco")
 
       // Retorna o serviço criado
       res.status(201).json({
@@ -51,7 +54,8 @@ import Salao from '../models/salao.model.js'
 
 
     } catch (err) {
-      return res.status(500).json({ mensagem: "Erro ao criar serviço", err });
+      console.error("Erro ao criar serviço:", err);
+      return res.status(500).json({ mensagem: "Erro ao criar serviço", erro: err.message });
     }
   }
 
