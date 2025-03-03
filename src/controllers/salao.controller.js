@@ -101,7 +101,11 @@ export const updateSalao = async (req, res) => {
   try {
     const { id } = req.params // Extrai o ID dos parâmetros da requisição
     const {nome, endereco, servicos} = req.body // Extrai os dados de atualização do corpo da requisição
-    
+
+    // Verificando se os campos estão preenchidos
+    if ( !nome && !endereco && !servicos ) {
+      return res.status(400).json({ message: "Informe ao menos um campo para atualizar!" })
+    }
 
     // Verificando se o ID é válido
     if ( !id ) {

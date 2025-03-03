@@ -9,10 +9,24 @@ import Salao from '../models/salao.model.js'
       const { salaoId } = req.params // Pegando o ID do salão da URL
       const {titulo, preco, duracao} = req.body // Pegando os dados do serviço
 
+      // Verifica se existe campos vazios
+      if (!titulo || !preco || !duracao) {
+        return res.status(400).json({ message: "Preencha todos os campos" });
+      }
+
       // Verifica se o salão existe
       const salao = await Salao.findById(salaoId)
       if(!salao) {
         return res.status(404).json({ message: "Salão não encontrado!" });
+      }
+
+      // Verifica se já existe um serviço com esse título no salão
+      const servicoExistente = await Servico.findOne({
+        titulo,
+        salao: salaoId,
+      })
+      if (servicoExistente) {
+        return res.status(400).json({ message: "Já existe um serviço com esse título no salão!" });
       }
 
       // Cria o serviço
@@ -21,20 +35,19 @@ import Salao from '../models/salao.model.js'
         preco,
         duracao,
         salao: salao._id, // Associando o salão ao serviço
-      })
+      }).populate('salao', 'nome endereco')
 
       await novoServico.save() // Salva no banco de dados
 
       // Retorna o serviço criado
       res.status(201).json({
-        id: novoHorario._id,
-        salao: novoHorario.salao,
-        colaborador: novoHorario.colaborador,
-        dias: novoHorario.dias,
-        inicio: novoHorario.inicio,
-        fim: novoHorario.fim,
-        dataCadastro: novoHorario.dataCadastro
+        id: novoServico._id,
+        titulo: novoServico.titulo,
+        preco: novoServico.preco,
+        duracao: novoServico.duracao,
+        salao: novoServico.salao
       })
+      
 
 
     } catch (err) {
