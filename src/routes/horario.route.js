@@ -7,10 +7,10 @@ import Salao from '../models/salao.model.js';
 
 // Importando controllers
 import {
-  getHorario,
   createHorario,
   updateHorario,
   deleteHorario,
+  getHorarios,
 } from '../controllers/horario.controller.js';
 
 // Middleware para verificar se o token JWT está presente e válido
@@ -20,7 +20,7 @@ import { verificarToken } from '../middlewares/autenticacao.middleware.js';
 import { verificaDonoRecurso } from '../middlewares/verificaDonoRecurso.middleware.js';
 
 // 🔓 Rotas públicas
-router.get('/:salaoId', getHorario); // Listar horários do salão
+router.get('/:salaoId', getHorarios); // Listar horários do salão
 
 // // 🔒 Rotas protegidas (apenas donos do salão podem gerenciar horários)
 router.post('/:salaoId', verificarToken, verificaDonoRecurso(Salao), createHorario); // Criar horário

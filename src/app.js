@@ -9,6 +9,7 @@ import SalaoRouter from './routes/salao.route.js'
 import UsuarioRouter from './routes/usuario.route.js'
 import ServicoRouter from './routes/servico.route.js'
 import HorarioRouter from './routes/horario.route.js'
+import AgendamentoRouter from './routes/agendamento.route.js'
 
 dotenv.config();
 connectDB();
@@ -31,6 +32,9 @@ app.use('/api/services', ServicoRouter);
 
 // Rotas para horários
 app.use('/api/time', HorarioRouter);
+
+// Rotas para agendamentos
+app.use('/api/booking', AgendamentoRouter);
 
 
 // Iniciar servidor

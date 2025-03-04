@@ -6,11 +6,6 @@ const horarioSchema = new mongoose.Schema({
     ref: "Salao",
     required: true
   },
-  colaborador: {
-    type: mongoose.Schema.Types.ObjectId, // Profissional
-    ref: "Usuario",
-    required: true
-  },
   dias: [
     {
       type: Number,

@@ -16,9 +16,14 @@ const agendamentoSchema = new mongoose.Schema({
     ref: 'Servico',
     required: true,
   },
-  data: {
-    type: Date,
+  horario: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Horario',
     required: true,
+  },
+  cancelado: {
+    type: Boolean,
+    default: false
   },
   status: {
     type: String,

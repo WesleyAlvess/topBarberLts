@@ -1,11 +1,11 @@
 import Horario from '../models/horario.model.js'
 import mongoose from 'mongoose';
 
-// Criando Horário
+
+// Criando Horário do salão
 export const createHorario = async (req, res) => {
   try {
     const { salaoId } = req.params; // Pega o ID do salão da URL
-    const colaboradorId = req.usuario.id; // Pega o ID do usuário logado
     const { dias, inicio, fim } = req.body; // Pega os dados do Body
 
     // Verifica se os campos estão vazios
@@ -16,17 +16,16 @@ export const createHorario = async (req, res) => {
     // Verifica se já existe horário para esse colaborador nos mesmos dias
     const horarioExistente = await Horario.findOne({
       salao: salaoId,
-      colaborador: colaboradorId,
       dias,
       })
+
     if(horarioExistente) {
-      return res.status(400).json({ mensagem: "Este profissional já possue horários cadastrados nesses dias" });
+      return res.status(400).json({ mensagem: "Já existe um horário cadastrado para esses dias no salão" });
     }
 
     // Cria um novo horário.
     const novoHorario = await Horario.create({
       salao: salaoId, // Obtido da URL
-      colaborador: colaboradorId, // Obtido automaticamente do token JWT
       dias,
       inicio,
       fim,
@@ -41,7 +40,7 @@ export const createHorario = async (req, res) => {
 
 
 // Listando Horários
-export const getHorario = async (req, res) => {
+export const getHorarios = async (req, res) => {
   try {
     const { salaoId } = req.params; // Pega o ID do salão da URL
 
@@ -50,8 +49,8 @@ export const getHorario = async (req, res) => {
       return res.status(400).json({ message: "ID do salão não fornecido!" });
     }
 
-    // Busca todos os horários do salão
-    const horarios = await Horario.find({ salao: salaoId }).populate('colaborador', 'nome');
+    //Busca todos os horários cadastrados para o salão
+    const horarios = await Horario.find({ salao: salaoId }).populate('salao', 'nome');
 
     return res.status(200).json(horarios); // Retorna os horários
 

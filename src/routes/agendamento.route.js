@@ -1,16 +1,25 @@
-// // routes/scheduleRoutes.js
-// import express from "express";
-// import { createSchedule, getSchedulesByUser, updateSchedule, deleteSchedule } from "../controllers/scheduleController.js";
+import express from "express";
+const router = express.Router();
 
-// const router = express.Router();
+import {
+  createAgendamento,
+  // getAllAgendamentos,
+  // getOneAgendamento,
+  // updateAgendamento,
+  // deleteAgendamento,
+} from "../controllers/agendamento.controller.js";
 
-// // Rota para criar um novo agendamento
-// router.post("/", createSchedule);
-// // Rota para listar agendamentos de um usuário específico
-// router.get("/:usuarioId", getSchedulesByUser);
-// // Rota para atualizar um agendamento (remarcar)
-// router.put("/:id", updateSchedule);
-// // Rota para cancelar um agendamento
-// router.delete("/:id", deleteSchedule);
+// Middleware para verificar autenticação
+import { verificarToken } from "../middlewares/autenticacao.middleware.js"
 
-// export default router;
+// 🔓 Rotas públicas
+// router.get("/:salaoId", verificarToken, getAgendamentos); // Listar agendamentos de um salão
+// router.get("/:salaoId/:id", verificarToken, getAgendamentoById); // Obter um agendamento específico
+
+
+// 🔒 Rotas protegidas (usuário autenticado pode criar, editar e cancelar)
+router.post("/:salaoId", verificarToken, createAgendamento); // Criar um agendamento
+// router.patch("/:salaoId/:id", verificarToken, updateAgendamento); // Atualizar status de um agendamento (ex: concluir, cancelar)
+// router.delete("/:salaoId/:id", verificarToken, deleteAgendamento); // Cancelar agendamento
+
+export default router;
