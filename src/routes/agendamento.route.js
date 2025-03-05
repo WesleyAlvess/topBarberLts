@@ -3,8 +3,8 @@ const router = express.Router();
 
 import {
   createAgendamento,
-  // getAllAgendamentos,
-  // getOneAgendamento,
+  listarAgendamentos,
+  listarAgendamentoById,
   // updateAgendamento,
   // deleteAgendamento,
 } from "../controllers/agendamento.controller.js";
@@ -13,8 +13,8 @@ import {
 import { verificarToken } from "../middlewares/autenticacao.middleware.js"
 
 // 🔓 Rotas públicas
-// router.get("/:salaoId", verificarToken, getAgendamentos); // Listar agendamentos de um salão
-// router.get("/:salaoId/:id", verificarToken, getAgendamentoById); // Obter um agendamento específico
+router.get("/:salaoId", verificarToken, listarAgendamentos); // Listar agendamentos de um salão
+router.get("/:salaoId/:id", verificarToken, listarAgendamentoById); // Obter um agendamento específico
 
 
 // 🔒 Rotas protegidas (usuário autenticado pode criar, editar e cancelar)
