@@ -12,14 +12,18 @@ const horarioSchema = new mongoose.Schema({
       required: true, // Dias da semana (0 = Domingo, 6 = Sábado)
     }
   ],
-  inicio: {
-    type: String, // inicio do expediente"09:00"
-    required: true
-  },
-  fim: {
-    type: String, // fim do expediente "18:00"
-    required: true
-  },
+  horarios: [
+    {
+      hora: {
+        type: String, // Exemplo: "09:00", "10:30", "14:00"
+        required: true
+      },
+      disponivel: {
+        type: Boolean,
+        default: true // Indica se o horário está disponível para agendamento
+      }
+    }
+  ],
   dataCadastro: {
     type: Date,
     default: Date.now

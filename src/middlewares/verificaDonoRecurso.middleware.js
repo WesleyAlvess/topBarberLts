@@ -11,12 +11,9 @@ export const verificaDonoRecurso = (model) => {
         return res.status(404).json({ message: 'Recurso não encontrado' });
       }
 
-      console.log(recursoId); // debug.log
       
       // Pega o recurso correto no banco de dados
       const recursoBanco = await model.findById(recursoId)
-
-      console.log(recursoBanco);
 
       // Verifica se o recurso existe
       if(!recursoBanco) {

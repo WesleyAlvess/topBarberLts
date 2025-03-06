@@ -61,8 +61,9 @@ export const listarAgendamentos = async (req, res) => {
   try {
     const agendamentos = await Agendamento.find() // Busca todos os agendamentos no banco
     .populate("salao", "nome endereco") // Traz o nome, endereco do salao
-    .populate("servico", "titulo preco") // Traz o servico, titulo e preco
+    .populate("servico", "titulo preco duracao") // Traz o servico, titulo e preco
     .populate("cliente", "nome") // Taz o cliente
+    // .populate("horario", "")                                                          Tenho que mecher nisso
     .sort({ dataCadastro: -1 }) // Ordena pelos mais recentes primeiro
 
     return res.status(200).json(agendamentos) // Retorna a lista de agendamentos

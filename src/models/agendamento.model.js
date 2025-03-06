@@ -3,7 +3,7 @@ import mongoose from "mongoose";
 const agendamentoSchema = new mongoose.Schema({
   cliente: {
     type: mongoose.Schema.Types.ObjectId,
-    ref: 'User',
+    ref: 'Usuario',
     required: true,
   },
   salao: {

@@ -6,32 +6,33 @@ import mongoose from 'mongoose';
 export const createHorario = async (req, res) => {
   try {
     const { salaoId } = req.params; // Pega o ID do salão da URL
-    const { dias, inicio, fim } = req.body; // Pega os dados do Body
+    const { dias, horarios, } = req.body; // Pega os dados do Body
 
     // Verifica se os campos estão vazios
-    if ( !dias || !inicio || !fim) {
+    if ( !dias || !horarios || !horarios.length === 0) {
       return res.status(400).json({ message: "Preencha todos os campos!" });
     }
 
-    // Verifica se já existe horário para esse colaborador nos mesmos dias
-    const horarioExistente = await Horario.findOne({
+  // Verifica se já existe um horário para o salão, dia e horário específico
+  const horarioExistente = await Horario.findOne({
+    salao: salaoId,
+    dias: { $in: dias },
+    "horarios.hora": { $in: horarios.map(h => h.hora) } // Verifica se já existe esse horário
+  });
+
+  if (horarioExistente) {
+    return res.status(400).json({ message: "Já existe um ou mais horários cadastrados para esse salão!" });
+  }
+
+    // Cria um novo horário
+    const novoHorario = await Horario.create({
       salao: salaoId,
       dias,
-      })
-
-    if(horarioExistente) {
-      return res.status(400).json({ mensagem: "Já existe um horário cadastrado para esses dias no salão" });
-    }
-
-    // Cria um novo horário.
-    const novoHorario = await Horario.create({
-      salao: salaoId, // Obtido da URL
-      dias,
-      inicio,
-      fim,
+      horarios,
     })
 
-    return res.status(201).json(novoHorario);
+    return res.status(201).json(novoHorario); // Retorna o novo horário criado
+
 
   } catch (err) {
     return res.status(500).json({ mensagem: "Erro ao criar horário", err });
@@ -64,10 +65,10 @@ export const getHorarios = async (req, res) => {
 export const updateHorario = async (req, res) => {
   try {
     const { salaoId, id } = req.params; // Pegando os IDs do Salão e do Horário
-    const { dias, inicio, fim } = req.body; // Pegando os dados do corpo da requisição
+    const { dias, horarios } = req.body; // Pegando os dados do corpo da requisição
 
     // Verifica se os campos estão vazios
-    if ( !dias || !inicio || !fim) {
+    if ( !dias || !horarios || !horarios.length === 0) {
       return res.status(400).json({ message: "Preencha todos os campos!" });
     }
 
@@ -81,8 +82,7 @@ export const updateHorario = async (req, res) => {
       // Novos valores
       {
         dias,
-        inicio,
-        fim,
+        horarios,
       },
       // Retorna o documento atualizado
       {
