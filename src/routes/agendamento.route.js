@@ -5,8 +5,7 @@ import {
   createAgendamento,
   listarAgendamentos,
   listarAgendamentoById,
-  // updateAgendamento,
-  // deleteAgendamento,
+  cancelarAgendamento,
 } from "../controllers/agendamento.controller.js";
 
 // Middleware para verificar autenticação
@@ -19,7 +18,6 @@ router.get("/:salaoId/:id", verificarToken, listarAgendamentoById); // Obter um 
 
 // 🔒 Rotas protegidas (usuário autenticado pode criar, editar e cancelar)
 router.post("/:salaoId", verificarToken, createAgendamento); // Criar um agendamento
-// router.patch("/:salaoId/:id", verificarToken, updateAgendamento); // Atualizar status de um agendamento (ex: concluir, cancelar)
-// router.delete("/:salaoId/:id", verificarToken, deleteAgendamento); // Cancelar agendamento
+router.put("/:id", verificarToken, cancelarAgendamento); // Cancelar agendamento
 
 export default router;

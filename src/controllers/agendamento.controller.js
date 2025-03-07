@@ -89,8 +89,13 @@ export const listarAgendamentos = async (req, res) => {
     .populate("salao", "nome endereco") // Traz o nome, endereco do salao
     .populate("servico", "titulo preco duracao") // Traz o servico, titulo e preco
     .populate("cliente", "nome") // Taz o cliente
-    // .populate("horario", "")                                                          Tenho que mecher nisso
+    .populate("horario", "hora") // Traz o horario
     .sort({ dataCadastro: -1 }) // Ordena pelos mais recentes primeiro
+
+    // Verifica de existe agendamentos
+    if(!agendamentos) {
+      return res.status(400).json({ mensagem: "Agendamentos não encontrados" })
+    }
 
     return res.status(200).json(agendamentos) // Retorna a lista de agendamentos
 
@@ -103,8 +108,69 @@ export const listarAgendamentos = async (req, res) => {
 // Listar agendamento por ID
 export const listarAgendamentoById = async (req, res) => {
   try {
+    const agendamentoId = req.params.id // Pega o ID do agendamento
+
+    const listarUmAgendamento = await Agendamento.findById(agendamentoId)
+    .populate("salao", "nome endereco") // Traz o nome, endereco do salao
+    .populate("servico", "titulo preco duracao") // Traz o servico, titulo e preco
+    .populate("cliente", "nome") // Taz o cliente
+    .populate("horario", "hora") // Traz o horario
+    if(!listarAgendamentoById) {
+      return res.status(400).json({ mensagem: "Agendamento não encontrado" })
+    }
+
+    return res.status(200).json(listarUmAgendamento)
     
   } catch (err) {
     return res.status(500).json({ mensagem: "Erro ao listar agendamento", erro: err.message })
+  }
+}
+
+// Atualizar agendamento
+export const cancelarAgendamento = async (req, res) => {
+  try {
+    const { id } = req.params // Pega o ID do agendamento da URL
+    const usuarioId = req.usuario.id // Pega o ID do usuário logado
+
+    // Busca agendamento no banco e verifica se ele existe
+    const agendamento = await Agendamento.findById(id)
+    if(!agendamento) {
+      return res.status(400).json({ mensagem: "Agendamento não encontrado" })
+    }
+
+    // verifica se o usuario logado e dono do agendamento
+    if(agendamento.cliente.toString() !== usuarioId) {
+      return res.status(403).json({ mensagem: "Você não tem permissão para cancelar este agendamento" });
+    }
+
+    // Verifica se o agendamento já está cancelado
+    if(agendamento.status === "cancelado") {
+      return res.status(400).json({ mensagem: "Este agendamento já foi cancelado" })
+    }
+
+    // Converte a data e horário do agendamento para um objeto Date
+    const dataHorarioAgendamento = new Date(`${agendamento.data}T${agendamento.horario}:00`)
+
+    // Obtem o horario atual
+    const agora = new Date()
+
+    // Calcula a diferença em milissegundos
+    const diferencaMS = dataHorarioAgendamento - agora
+    const diferencaHoras = diferencaMS / (1000 * 60 * 60) // Converte para horas
+
+    // Verifica se faltam menos de 2 horas para o agendamento
+    if(diferencaHoras < 2) {
+      return res.status(400).json({ mensagem: "O cancelamento só pode ser feito até 2 horas antes do horário agendado" });
+    } 
+
+    agendamento.status = "cancelado"  // Atualiza o status do agendamento para "cancelado"
+    agendamento.cancelado = "true" // Atualiza o valor de cancelado pra true
+    await agendamento.save()  // Salva no banco
+
+    return res.status(200).json({ mensagem: "Agendamento cancelado com sucesso" });
+
+
+  } catch (err) {
+    return res.status(500).json({ mensagem: "Erro ao cancelar agendamento", erro: err.message })
   }
 }
