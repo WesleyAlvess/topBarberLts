@@ -6,10 +6,10 @@ import jwt from "jsonwebtoken";
 export const createUsuario = async (req, res) => {
   try {
     // Pegando dados do request
-    const { nome, email, senha, telefone, foto, } = req.body;
+    const { nome, email, senha, telefone } = req.body;
 
     // Validando dados
-    if (!nome || !email || !senha) {
+    if (!nome || !email || !senha) {  
       return res
         .status(400)
         .json({ message: "Preencha todos os campos obrigatórios!" });
