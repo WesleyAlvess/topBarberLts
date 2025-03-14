@@ -33,7 +33,6 @@ export const createUsuario = async (req, res) => {
       email,
       senha: senhaCriptografada, // Armazena a senha já criptografada
       telefone,
-      foto,
       tipo: "cliente", // Sempre começa como cliente
     });
 
@@ -150,7 +149,7 @@ export const updateSenhaPerfil = async (req, res) => {
 
 
     //Verificando se a nova senha e igual a antiga
-    if(senhaAtual === novaSenha) {
+    if (senhaAtual === novaSenha) {
       return res.status(400).json({ message: "A nova senha não pode ser igual à senha atual!" });
     }
 
@@ -206,7 +205,7 @@ export const updateDadosPerfil = async (req, res) => {
     );
 
     // Verificando se o usuário foi encontrado
-    if(!usuarioAtualizado){
+    if (!usuarioAtualizado) {
       return res.status(404).json({ message: "Usuário não encontrado!" });
     }
 
@@ -233,12 +232,12 @@ export const deleteContaUsuario = async (req, res) => {
     const usuario = await Usuario.findById(usuarioId) // Buscando o usuário no banco de dados
 
     // Verificando se o campo senha foi enviado
-    if(!senha) {
+    if (!senha) {
       return res.status(400).json({ message: "Por favor, preencha sua senha para confirmar a exclusão da conta" });
     }
 
     //verificando se o usuário existe 
-    if(!usuario) {
+    if (!usuario) {
       return res.status(404).json({ message: "Usuário não encontrado!" });
     }
 
@@ -246,7 +245,7 @@ export const deleteContaUsuario = async (req, res) => {
     const senhaValida = await bcrypt.compare(senha, usuario.senha)
 
     // Verificando se a senha é válida
-    if(!senhaValida) {
+    if (!senhaValida) {
       return res.status(401).json({ message: "Senha incorreta!" });
     }
 
