@@ -17,7 +17,7 @@ connectDB();
 const app = express();
 
 const corsOptions = {
-  origin: 'http://192.168.0.10', // Altere para o IP do seu app ou o domínio
+  origin: 'https://topbarberserver.onrender.com', // Alterar para a URL do seu app frontend
   methods: 'GET,POST,PUT,DELETE',
 };
 
