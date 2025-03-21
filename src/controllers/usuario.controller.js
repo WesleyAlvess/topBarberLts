@@ -6,7 +6,7 @@ import jwt from "jsonwebtoken";
 export const createUsuario = async (req, res) => {
   try {
     // Pegando dados do request
-    const { nome, email, senha, telefone } = req.body;
+    const { nome, email, senha, telefone, foto } = req.body;
 
     // Validando dados
     if (!nome || !email || !senha) {
@@ -33,6 +33,7 @@ export const createUsuario = async (req, res) => {
       email,
       senha: senhaCriptografada, // Armazena a senha já criptografada
       telefone,
+      foto: foto || "https://robohash.org/wesley?set=set1", // Se não enviar, usa a imagem padrão
       tipo: "cliente", // Sempre começa como cliente
     });
 
@@ -57,7 +58,7 @@ export const createUsuario = async (req, res) => {
       nome: novoUsuario.nome,
       email: novoUsuario.email,
       telefone: novoUsuario.telefone,
-      foto: novoUsuario.foto,
+      foto: novoUsuario.foto, // Aqui retornamos a URL da imagem
       tipo: novoUsuario.tipo, // "cliente"
       status: novoUsuario.status, // "ativo"
       dataCadastro: novoUsuario.dataCadastro,
@@ -200,34 +201,31 @@ export const updateSenhaPerfil = async (req, res) => {
 export const updateDadosPerfil = async (req, res) => {
   try {
     // Pegando o ID do usuário autenticado (armazenado pelo middleware)
-    const usuarioId = req.usuario.id; // Pegando apenas o ID do usuário autenticado
+    const usuarioId = req.usuario.id;
 
     // Pegando os dados do request
     const { nome, telefone, foto } = req.body;
 
-    // Verificar se pelo menos um campo foi enviado
-    if (!nome && !telefone && !foto) {
-      return res.status(400).json({ message: "Preencha pelo menos um campo!" });
-    }
-
-    // Atualizando dados do usuario
-    const usuarioAtualizado = await Usuario.findByIdAndUpdate(
-      usuarioId,
-      { nome, telefone, foto }, // Campos a serem atualizados
-      { new: true, runValidators: true } // Retorna os dados atualizados e aplica validações
-    );
-
-    // Verificando se o usuário foi encontrado
-    if (!usuarioAtualizado) {
+    // Buscar o usuário no banco de dados
+    const usuario = Usuario.findById(usuarioId)
+    if (!usuario) {
       return res.status(404).json({ message: "Usuário não encontrado!" });
     }
 
-    // Retornando os dados do usuário atualizado
+    // Atualizando so dados enviados pelo usuario (se forem fornecidos)
+    if (nome) usuario.nome = nome
+    if (telefone) usuario.telefone = telefone
+    if (foto) usuario.foto = foto
+
+    // Salvando as alterações no banco de dados
+    await usuario.save()
+
+    // Retornando os dados atualizados do usuário (sem a senha)
     res.status(200).json({
-      _id: usuarioAtualizado._id,
-      nome: usuarioAtualizado.nome,
-      telefone: usuarioAtualizado.telefone,
-      foto: usuarioAtualizado.foto,
+      _id: usuario._id,
+      nome: usuario.nome,
+      telefone: usuario.telefone,
+      foto: usuario.foto,
     })
 
   } catch (err) {
