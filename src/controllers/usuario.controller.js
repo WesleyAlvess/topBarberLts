@@ -206,6 +206,11 @@ export const updateDadosPerfil = async (req, res) => {
     // Pegando os dados do request
     const { nome, telefone, foto } = req.body;
 
+    // Verificando se ao menos um dado foi fornecido
+    if (!nome && !telefone && !foto) {
+      return res.status(400).json({ message: "Nenhum dado foi fornecido para atualização." });
+    }
+
     // Buscar o usuário no banco de dados
     const usuario = await Usuario.findById(usuarioId)
     if (!usuario) {
