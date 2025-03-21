@@ -21,7 +21,7 @@ const usuarioSchema = new mongoose.Schema({
   },
   foto: {
     type: String,
-    default: "" // Imagem Gravatar padrão
+    default: "",
   },
   tipo: {
     type: String,
