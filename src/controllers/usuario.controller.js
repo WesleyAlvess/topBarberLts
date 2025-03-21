@@ -15,7 +15,7 @@ export const createUsuario = async (req, res) => {
         .json({ message: "Preencha todos os campos obrigatórios!" });
     }
 
-    // Verificando se já existe um usuário com o mesmo email
+    // Verifica se o email já está cadastrado
     const usuarioExistente = await Usuario.findOne({ email });
     if (usuarioExistente) {
       return res
@@ -39,7 +39,19 @@ export const createUsuario = async (req, res) => {
     // Salvar o novo usuário no MongoDB
     await novoUsuario.save();
 
-    // Retornar o usuário criado (sem exibir a senha)
+    // Gera um token JWT com as informações do usuário
+    const token = jwt.sign(
+      {
+        id: novoUsuario._id,
+        tipo: novoUsuario.tipo,
+      },
+      process.env.JWT_SECRET, // Chave secreta do JWT
+      {
+        expiresIn: "7d", // Token expira em 1 dia
+      }
+    );
+
+    // Retornar o usuário criado com o token (sem exibir a senha)
     res.status(201).json({
       _id: novoUsuario._id,
       nome: novoUsuario.nome,
@@ -49,6 +61,7 @@ export const createUsuario = async (req, res) => {
       tipo: novoUsuario.tipo, // "cliente"
       status: novoUsuario.status, // "ativo"
       dataCadastro: novoUsuario.dataCadastro,
+      token,
     })
 
   } catch (err) {
