@@ -207,7 +207,7 @@ export const updateDadosPerfil = async (req, res) => {
     const { nome, telefone, foto } = req.body;
 
     // Buscar o usuário no banco de dados
-    const usuario = Usuario.findById(usuarioId)
+    const usuario = await Usuario.findById(usuarioId)
     if (!usuario) {
       return res.status(404).json({ message: "Usuário não encontrado!" });
     }
