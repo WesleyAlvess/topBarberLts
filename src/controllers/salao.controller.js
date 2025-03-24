@@ -12,17 +12,23 @@ import Usuario from "../models/usuario.model.js"
 export const createSalao = async (req, res) => {
   try {
     // Pegando dados do request
-    const { nome, endereco,} = req.body; // Extrai os dados do corpo da requisição
+    const { nome, endereco, } = req.body; // Extrai os dados do corpo da requisição
     const donoId = req.usuario.id; // Pegando ID do usuário autenticado (vem do middleware de autenticação)
 
     // Validando dados do request
-    if ( !nome ||!endereco ) {
+    if (!nome || !endereco) {
       return res.status(400).json({ error: "Todos os campos são obrigatórios!" });
     }
 
-    // // Verificando se já existe um salão com esse nome
+    // Verificando se o usuario ja tem um salão cadastrado
+    const jaTemSalao = await Salao.findOne({ dono: donoId })
+    if (jaTemSalao) {
+      return res.status(400).json({ error: "Você já possui um salão cadastrado!" });
+    }
+
+    // Verificando se já existe um salão com esse nome
     const salaoExiste = await Salao.findOne({ nome });
-    if(salaoExiste) {
+    if (salaoExiste) {
       return res.status(400).json({ error: "Já existe um salão com esse nome!" });
     }
 
@@ -71,12 +77,12 @@ export const getSalaoById = async (req, res) => {
   try {
     // Pegando o ID do salão
     const { id } = req.params // Extrai o ID dos parâmetros da requisição
-    
+
     // Verificando se o ID é válido
     if (!id) {
       return res.status(400).json({ message: "ID do salão não fornecido!" })
     }
-    
+
     // Buscando o salão pelo ID no MongoDB
     const salao = await Salao.findById(id)
 
@@ -100,15 +106,15 @@ export const getSalaoById = async (req, res) => {
 export const updateSalao = async (req, res) => {
   try {
     const { id } = req.params // Extrai o ID dos parâmetros da requisição
-    const {nome, endereco, servicos} = req.body // Extrai os dados de atualização do corpo da requisição
+    const { nome, endereco, servicos } = req.body // Extrai os dados de atualização do corpo da requisição
 
     // Verificando se os campos estão preenchidos
-    if ( !nome && !endereco && !servicos ) {
+    if (!nome && !endereco && !servicos) {
       return res.status(400).json({ message: "Informe ao menos um campo para atualizar!" })
     }
 
     // Verificando se o ID é válido
-    if ( !id ) {
+    if (!id) {
       return res.status(400).json({ message: "ID do salão inválido ou não fornecido!" })
     }
 
@@ -118,15 +124,15 @@ export const updateSalao = async (req, res) => {
       return res.status(404).json({ message: "Salão não encontrado!" })
     }
 
-      // Verificando se os dados de atualização são os mesmos que já existem no banco de dados
-      if(nome === salao.nome) {
-        return res.status(400).json({ message: "Esse nome ja está em uso!" })
-      }
+    // Verificando se os dados de atualização são os mesmos que já existem no banco de dados
+    if (nome === salao.nome) {
+      return res.status(400).json({ message: "Esse nome ja está em uso!" })
+    }
 
     // Atualizando somente os campos informados pelo usuário
-    if(nome) salao.nome = nome
-    if(endereco) salao.endereco = endereco
-    if(servicos) salao.servicos = servicos
+    if (nome) salao.nome = nome
+    if (endereco) salao.endereco = endereco
+    if (servicos) salao.servicos = servicos
 
     // Salvando as alterações no banco de dados
     await salao.save()
@@ -145,7 +151,7 @@ export const updateSalao = async (req, res) => {
 // Deletar um salão específico
 export const deleteSalao = async (req, res) => {
   try {
-    const {id} = req.params // Extrai o ID dos parâmetros da requisição
+    const { id } = req.params // Extrai o ID dos parâmetros da requisição
 
     // Verificando se o ID é válido
     if (!id || !mongoose.Types.ObjectId.isValid(id)) {
@@ -155,7 +161,7 @@ export const deleteSalao = async (req, res) => {
     // Buscando e deletando o salão pelo ID no MongoDB
     const salao = await Salao.findByIdAndDelete(id)
 
-   // Verificando se o salão foi encontrado e deletado
+    // Verificando se o salão foi encontrado e deletado
     if (!salao) {
       return res.status(404).json({ message: "Salão não encontrado!" })
     }
