@@ -6,17 +6,19 @@ export const verificaDonoRecurso = (model) => {
       // Pega o ID do recurso que queremos modificar.
       const recursoId = req.params.salaoId || req.params.id
 
+      console.log(req.usuario.id);
+
       // Verifica se o recurso existe.
-      if(!recursoId) {
+      if (!recursoId) {
         return res.status(404).json({ message: 'Recurso não encontrado' });
       }
 
-      
+
       // Pega o recurso correto no banco de dados
       const recursoBanco = await model.findById(recursoId)
 
       // Verifica se o recurso existe
-      if(!recursoBanco) {
+      if (!recursoBanco) {
         return res.status(404).json({ message: 'Recurso não encontrado' });
       }
 
@@ -25,12 +27,12 @@ export const verificaDonoRecurso = (model) => {
 
 
       // Verifica se o usuário autenticado é o dono do recurso
-      if(recursoBanco[campoDono].toString() !== req.usuario.id.toString()) {
+      if (recursoBanco[campoDono].toString() !== req.usuario.id.toString()) {
         return res.status(403).json({ message: 'Acesso negado! Você não é o dono deste recurso' });
       }
 
       next()
-      
+
     } catch (err) {
       console.error('Erro ao verificar o dono do recurso:', err);
       res.status(500).json({ message: 'Erro no servidor' });

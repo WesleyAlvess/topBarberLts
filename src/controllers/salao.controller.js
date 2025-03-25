@@ -56,6 +56,26 @@ export const createSalao = async (req, res) => {
   }
 };
 
+// Verifica salão do usuario
+export const verificaSalao = async (req, res) => {
+  try {
+    const donoId = req.usuario.id; // Pegando ID do usuário autenticado
+    const salaoExistente = await Salao.findOne({ dono: donoId }); // Busca no banco por um salão criado por ele
+
+    // Verifica se o usuário possui um salão se ele tiver não deixa criar outro
+    if (salaoExistente) {
+      return res.status(400).json({ error: "Você já possui um salão cadastrado!" });
+    }
+
+    // Se não tiver um salão permite ele criar um
+    res.status(200).json({ message: "Você pode criar um salão." });
+
+  } catch (error) {
+    console.error("Erro ao verificar salão:", err);
+    res.status(500).json({ error: "Erro interno no servidor." });
+  }
+}
+
 // Listar todos os salões
 export const getSalao = async (req, res) => {
   try {
