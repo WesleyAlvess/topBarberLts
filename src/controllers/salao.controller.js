@@ -62,13 +62,13 @@ export const verificaSalao = async (req, res) => {
     const donoId = req.usuario.id; // Pegando ID do usuário autenticado
     const salaoExistente = await Salao.findOne({ dono: donoId }); // Busca no banco por um salão criado por ele
 
-    // Verifica se o usuário possui um salão se ele tiver não deixa criar outro
+    // Se ele tiver um salao manda true e permite ele criar um
     if (salaoExistente) {
-      return res.status(400).json({ error: "Você já possui um salão cadastrado!" });
+      return res.status(200).json({ temSalao: true });
     }
 
-    // Se não tiver um salão permite ele criar um
-    res.status(200).json({ message: "Você pode criar um salão." });
+    // Se não tiver um salão envia false permite ele criar um
+    res.status(200).json({ temSalao: false });
 
   } catch (error) {
     console.error("Erro ao verificar salão:", err);
