@@ -56,23 +56,39 @@ export const createSalao = async (req, res) => {
   }
 };
 
-// Verifica salão do usuario
-export const verificaSalao = async (req, res) => {
+// Rota para retornar os dados do perfil do salão
+export const authSalaoPerfil = async (req, res) => {
   try {
-    const donoId = req.usuario.id; // Pegando ID do usuário autenticado
-    const salaoExistente = await Salao.findOne({ dono: donoId }); // Busca no banco por um salão criado por ele
+    const usuarioId = req.usuario.id; // Pegando ID do usuário autenticado
+    console.log(usuarioId);
 
-    // Se ele tiver um salao manda true e permite ele criar um
-    if (salaoExistente) {
-      return res.status(200).json({ temSalao: true });
+    // Buscando o usuário no banco de dados
+    const usuario = await Usuario.findById(usuarioId).select('-senha')
+    console.log(usuario);
+
+    // Verificando se o usuário foi encontrado
+    if (!usuario) {
+      return res.status(404).json({ message: "Usuário não encontrado!" });
     }
 
-    // Se não tiver um salão envia false permite ele criar um
-    res.status(200).json({ temSalao: false });
+    if (usuario.tipo !== 'profissional') {
+      return res.status(400).json({ message: "O usuário não é um profissional!" });
+    }
+
+    // Caso o usuário seja profissional, vamos buscar os dados do salão associado
+    const salao = await Salao.findOne({ dono: usuarioId }).populate('servicos') // Populando os serviços do salão
+
+    // Verificando se o salão foi encontrado
+    if (!salao) {
+      return res.status(404).json({ message: "Salão não encontrado!" });
+    }
+
+    // Retornando os dados do salão
+    res.json(salao);
 
   } catch (error) {
-    console.error("Erro ao verificar salão:", err);
-    res.status(500).json({ error: "Erro interno no servidor." });
+    console.error("Erro ao buscar perfil do salão:", err);
+    res.status(500).json({ message: "Erro ao buscar os dados do salão" });
   }
 }
 
