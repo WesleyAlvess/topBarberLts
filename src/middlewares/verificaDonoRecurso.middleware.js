@@ -1,44 +1,38 @@
 export const verificaDonoRecurso = (model) => {
   return async (req, res, next) => {
     try {
-      // Pega o ID do recurso que queremos modificar.
+      // Obtém o ID do recurso da requisição (exemplo: ID do salão ou do usuário)
       const recursoId = req.params.salaoId || req.params.id;
 
-      // Verifica se o recursoId foi passado corretamente
       if (!recursoId) {
-        return res.status(400).json({ message: 'ID do recurso não fornecido' });
+        return res.status(404).json({ message: "Recurso não encontrado" });
       }
 
-      // Verifica se req.usuario existe e se tem um ID
-      if (!req.usuario || !req.usuario.id) {
-        return res.status(401).json({ message: 'Usuário não autenticado' });
-      }
-
-      // Busca o recurso no banco de dados
+      // Busca o recurso no banco de dados usando o ID
       const recursoBanco = await model.findById(recursoId);
 
-      // Verifica se o recurso existe
       if (!recursoBanco) {
-        return res.status(404).json({ message: 'Recurso não encontrado' });
+        return res.status(404).json({ message: "Recurso não encontrado" });
       }
 
-      // Detecta dinamicamente se o dono é "usuario" ou "dono"
-      const campoDono = recursoBanco.usuario ? "usuario" : recursoBanco.dono ? "dono" : null;
+      // Descobre automaticamente o campo que representa o dono do recurso
+      const campoDono = recursoBanco.dono ? "dono" : recursoBanco.usuario ? "usuario" : null;
 
-      // Se não houver um campo de dono definido, retorna erro
+      // Se não encontrar um campo de dono, retorna erro
       if (!campoDono) {
-        return res.status(400).json({ message: 'Recurso inválido, não possui proprietário definido' });
+        return res.status(400).json({ message: "Não foi possível determinar o dono do recurso." });
       }
 
       // Verifica se o usuário autenticado é o dono do recurso
-      if (recursoBanco[campoDono].toString() !== req.usuario.id.toString()) {
-        return res.status(403).json({ message: 'Acesso negado! Você não é o dono deste recurso' });
+      if (!recursoBanco[campoDono] || recursoBanco[campoDono].toString() !== req.usuario.id.toString()) {
+        return res.status(403).json({ message: "Acesso negado! Você não tem permissão para esta ação." });
       }
 
-      next();
+      next(); // Permite a continuação da requisição
+
     } catch (err) {
-      console.error('Erro ao verificar o dono do recurso:', err);
-      res.status(500).json({ message: 'Erro no servidor' });
+      console.error("Erro ao verificar o dono do recurso:", err);
+      res.status(500).json({ message: "Erro no servidor" });
     }
   };
 };
