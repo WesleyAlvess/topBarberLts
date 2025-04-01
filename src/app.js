@@ -16,9 +16,14 @@ connectDB();
 
 const app = express();
 
+const corsOptions = {
+  origin: 'https://topbarberserver.onrender.com', // Alterar para a URL do seu app frontend
+  methods: 'GET,POST,PUT,DELETE',
+};
+
 // Middlewares
 app.use(express.json());
-app.use(cors());
+app.use(cors(corsOptions));
 
 // Rotas
 // Rotas para salões
