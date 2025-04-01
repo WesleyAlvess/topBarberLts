@@ -1,21 +1,21 @@
-
-
 export const verificaDonoRecurso = (model) => {
   return async (req, res, next) => {
     try {
       // Pega o ID do recurso que queremos modificar.
-      const recursoId = req.params.salaoId || req.params.id
+      const recursoId = req.params.salaoId || req.params.id;
 
-      console.log(req.usuario.id);
-
-      // Verifica se o recurso existe.
+      // Verifica se o recursoId foi passado corretamente
       if (!recursoId) {
-        return res.status(404).json({ message: 'Recurso não encontrado' });
+        return res.status(400).json({ message: 'ID do recurso não fornecido' });
       }
 
+      // Verifica se req.usuario existe e se tem um ID
+      if (!req.usuario || !req.usuario.id) {
+        return res.status(401).json({ message: 'Usuário não autenticado' });
+      }
 
-      // Pega o recurso correto no banco de dados
-      const recursoBanco = await model.findById(recursoId)
+      // Busca o recurso no banco de dados
+      const recursoBanco = await model.findById(recursoId);
 
       // Verifica se o recurso existe
       if (!recursoBanco) {
@@ -23,19 +23,22 @@ export const verificaDonoRecurso = (model) => {
       }
 
       // Detecta dinamicamente se o dono é "usuario" ou "dono"
-      const campoDono = recursoBanco.usuario ? "usuario" : "dono"
+      const campoDono = recursoBanco.usuario ? "usuario" : recursoBanco.dono ? "dono" : null;
 
+      // Se não houver um campo de dono definido, retorna erro
+      if (!campoDono) {
+        return res.status(400).json({ message: 'Recurso inválido, não possui proprietário definido' });
+      }
 
       // Verifica se o usuário autenticado é o dono do recurso
       if (recursoBanco[campoDono].toString() !== req.usuario.id.toString()) {
         return res.status(403).json({ message: 'Acesso negado! Você não é o dono deste recurso' });
       }
 
-      next()
-
+      next();
     } catch (err) {
       console.error('Erro ao verificar o dono do recurso:', err);
       res.status(500).json({ message: 'Erro no servidor' });
     }
-  }
-}
+  };
+};
