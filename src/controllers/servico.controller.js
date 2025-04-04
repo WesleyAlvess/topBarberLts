@@ -59,13 +59,15 @@ export const createServico = async (req, res) => {
   }
 }
 
-// Listar todos os serviços
+// Listar serviços do salao do usuario
 export const getServicos = async (req, res) => {
   try {
-    // Busca todos os serviços no banco
-    const servicos = await Servico.find().populate('salao', 'nome endereco').sort({ dataCadastro: 1 })
+    const { salaoId } = req.params // Pega o ID do salão da URL
 
-    res.status(200).json(servicos); // Retorna os dados
+    // Busca todos os serviços no banco
+    const servicos = await Servico.find({ salao: salaoId }).populate('salao', 'nome endereco').sort({ dataCadastro: 1 })
+
+    res.status(200).json(servicos); // Retorna os serviços do salão
 
   } catch (err) {
     // Trata erros inesperados

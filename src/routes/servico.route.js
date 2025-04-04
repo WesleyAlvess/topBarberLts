@@ -19,7 +19,7 @@ import { verificarToken } from "../middlewares/autenticacao.middleware.js";
 // Middleware para verificar se o usuário é dono do salão
 import { verificaDonoRecurso } from "../middlewares/verificaDonoRecurso.middleware.js";
 
-// 🔓 Rotas públicas
+// Rotas 
 router.get("/:salaoId", getServicos); // Listar serviços de um salão
 router.get("/:salaoId/:id", getServicoById); // Listar um serviço específico
 
