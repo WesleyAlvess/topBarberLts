@@ -59,22 +59,30 @@ export const createServico = async (req, res) => {
   }
 }
 
-// Listar serviços do salao do usuario
+// Listar serviços do salão do usuário
 export const getServicos = async (req, res) => {
   try {
-    const { salaoId } = req.params // Pega o ID do salão da URL
+    const { salaoId } = req.params; // Pega o ID do salão da URL
+    console.log("ID do salão recebido:", salaoId);
 
-    // Busca todos os serviços no banco
-    const servicos = await Servico.find({ salao: salaoId }).populate('salao', 'nome endereco').sort({ dataCadastro: 1 })
+    // Verifica se o ID é válido
+    if (!mongoose.Types.ObjectId.isValid(salaoId)) {
+      return res.status(400).json({ error: "ID do salão inválido" });
+    }
 
-    res.status(200).json(servicos); // Retorna os serviços do salão
+    // Busca todos os serviços associados ao salão
+    const servicos = await Servico.find({ salao: salaoId })
+      .populate("salao", "nome endereco") // Popula os dados do salão
+      .sort({ dataCadastro: 1 }); // Ordena por data de cadastro
 
+    console.log("Serviços cadastrados:", servicos);
+
+    return res.status(200).json(servicos); // Retorna os serviços encontrados
   } catch (err) {
-    // Trata erros inesperados
-    console.error("Erro ao listar Servicos:", err); // Log do erro para debug
-    return res.status(500).json({ error: err.message });
+    console.error("Erro ao listar serviços:", err); // Log do erro para debug
+    return res.status(500).json({ error: "Erro interno do servidor." });
   }
-}
+};
 
 // Buscar um serviço específico
 export const getServicoById = async (req, res) => {
