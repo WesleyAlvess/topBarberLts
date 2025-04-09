@@ -8,22 +8,29 @@ const horarioSchema = new mongoose.Schema({
   },
   dias: [
     {
-      type: Number,
-      required: true, // Dias da semana (0 = Domingo, 6 = Sábado)
-    }
-  ],
-  horarios: [
-    {
-      hora: {
-        type: String, // Exemplo: "09:00", "10:30", "14:00"
+      dia: {
+        type: Number, // 0 (Domingo) a 6 (Sábado)
         required: true
       },
-      disponivel: {
+      fechado: {
         type: Boolean,
-        default: true // Indica se o horário está disponível para agendamento
-      }
+        required: false // Define se o salão/barbeiro estará fechado nesse dia
+      },
+      horarios: [
+        {
+          hora: {
+            type: String, // Exemplo: "09:00"
+            required: true
+          },
+          disponivel: {
+            type: Boolean,
+            default: true
+          }
+        }
+      ]
     }
   ],
+
   dataCadastro: {
     type: Date,
     default: Date.now

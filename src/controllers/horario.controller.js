@@ -6,39 +6,38 @@ import mongoose from 'mongoose';
 export const createHorario = async (req, res) => {
   try {
     const { salaoId } = req.params; // Pega o ID do salão da URL
-    const { dias, horarios, } = req.body; // Pega os dados do Body
+    const { dias } = req.body; // Pega os dados do Body
 
     // Verifica se os campos estão vazios
-    if ( !dias || !horarios || !horarios.length === 0) {
-      return res.status(400).json({ message: "Preencha todos os campos!" });
+    if (!dias || !dias.length === 0) {
+      return res.status(400).json({ message: "Preencha todos os dias com os horários!" });
     }
 
-  // Verifica se já existe um horário para o salão, dia e horário específico
-  const horarioExistente = await Horario.findOne({
-    salao: salaoId,
-    dias: { $in: dias },
-    "horarios.hora": { $in: horarios.map(h => h.hora) } // Verifica se já existe esse horário
-  });
+    // Verifica se já existe um horário cadastrado para esse salão
+    const horarioExistente = await Horario.findOne({ salao: salaoId })
 
-  if (horarioExistente) {
-    return res.status(400).json({ message: "Já existe um ou mais horários cadastrados para esse salão!" });
-  }
+    if (horarioExistente) {
+      return res.status(400).json({ message: "Horários já cadastrados para esse salão!" });
+    }
 
     // Cria um novo horário
     const novoHorario = await Horario.create({
       salao: salaoId,
-      dias,
-      horarios,
+      dias: dias.map(d => ({
+        dia: d.dia,
+        fechado: d.fechado || false,
+        horarios: d.horarios || []
+      }))
     })
 
     return res.status(201).json(novoHorario); // Retorna o novo horário criado
 
 
   } catch (err) {
+    console.error("Erro ao criar horário:", err);
     return res.status(500).json({ mensagem: "Erro ao criar horário", err });
   }
 }
-
 
 // Listando Horários
 export const getHorarios = async (req, res) => {
@@ -46,7 +45,7 @@ export const getHorarios = async (req, res) => {
     const { salaoId } = req.params; // Pega o ID do salão da URL
 
     // Verifica se o ID é válido
-    if(!salaoId) {
+    if (!salaoId) {
       return res.status(400).json({ message: "ID do salão não fornecido!" });
     }
 
@@ -60,15 +59,14 @@ export const getHorarios = async (req, res) => {
   }
 }
 
-
 // Atualizar Horário
 export const updateHorario = async (req, res) => {
   try {
     const { salaoId, id } = req.params; // Pegando os IDs do Salão e do Horário
-    const { dias, horarios } = req.body; // Pegando os dados do corpo da requisição
+    const { dias } = req.body; // Pegando os dados do corpo da requisição
 
     // Verifica se os campos estão vazios
-    if ( !dias || !horarios || !horarios.length === 0) {
+    if (!dias || !dias.length === 0) {
       return res.status(400).json({ message: "Preencha todos os campos!" });
     }
 
@@ -76,22 +74,21 @@ export const updateHorario = async (req, res) => {
     const horarioAtualizado = await Horario.findByIdAndUpdate(
       // Condição de busca
       {
-      _id: id, // ID do horário
-      salao: salaoId, // ID do salão
+        _id: id, // ID do horário
+        salao: salaoId, // ID do salão
       },
       // Novos valores
       {
         dias,
-        horarios,
       },
       // Retorna o documento atualizado
       {
         new: true,
       }
-  )
+    )
 
     // Verifica se o horário foi encontrado
-    if(!horarioAtualizado) {
+    if (!horarioAtualizado) {
       return res.status(404).json({ message: "Horário não encontrado!" });
     }
 
@@ -103,7 +100,6 @@ export const updateHorario = async (req, res) => {
     return res.status(500).json({ mensagem: "Erro ao atualizar horário", erro: err.message });
   }
 }
-
 
 // Deletar Horário
 export const deleteHorario = async (req, res) => {
