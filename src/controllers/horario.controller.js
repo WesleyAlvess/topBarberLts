@@ -133,25 +133,15 @@ export const updateHorario = async (req, res) => {
 // Deletar Horário
 export const deleteHorario = async (req, res) => {
   try {
-    const { salaoId, id } = req.params; // Pegando Ids do salão e do horário
+    const { salaoId } = req.params;
 
-    // Verifica se os IDs são válidos
-    if (!mongoose.Types.ObjectId.isValid(salaoId) || !mongoose.Types.ObjectId.isValid(id)) {
-      return res.status(400).json({ message: "IDs inválidos" });
+    if (!mongoose.Types.ObjectId.isValid(salaoId)) {
+      return res.status(400).json({ message: "ID do salão inválido" });
     }
 
-    // Verifica se o horário pertence ao salão correto e o deleta
-    const horarioDeletado = await Horario.findOneAndDelete({
-      _id: id,
-      salao: salaoId,
-    });
+    const resultado = await Horario.deleteMany({ salao: salaoId });
 
-    // Verifica se o horário foi encontrado
-    if (!horarioDeletado) {
-      return res.status(404).json({ message: "Horário não encontrado!" });
-    }
-
-    return res.status(200).json({ message: "Horário deletado com sucesso!" });
+    return res.status(200).json({ message: "Todos os horários foram apagados com sucesso!" });
 
   } catch (err) {
     console.error("Erro ao deletar horário:", err);
