@@ -25,6 +25,6 @@ router.get('/:salaoId', getHorarios); // Listar horários do salão
 // // 🔒 Rotas protegidas (apenas donos do salão podem gerenciar horários)
 router.post('/:salaoId', verificarToken, verificaDonoRecurso(Salao), createHorario); // Criar horário
 router.patch('/:salaoId/:id', verificarToken, verificaDonoRecurso(Salao), updateHorario); // Atualizar horário
-router.delete('/:salaoId/:id', verificarToken, verificaDonoRecurso(Salao), deleteHorario); // Deletar horário
+router.delete('/:salaoId', verificarToken, verificaDonoRecurso(Salao), deleteHorario); // Deletar horário
 
 export default router;
