@@ -4,7 +4,7 @@ const router = express.Router(); // Criando um router para rotas
 // Importando controllers
 import {
   createSalao, getSalao, getSalaoById, updateSalao, deleteSalao,
-  authSalaoPerfil
+  authSalaoPerfil, buscarSalaoNumero
 } from '../controllers/salao.controller.js';
 
 import { verificarToken } from '../middlewares/autenticacao.middleware.js'; // Middleware para verificar se o token JWT está presente e válido
@@ -17,6 +17,7 @@ router.get("/salao", verificarToken, authSalaoPerfil); // Buscar dados do salão
 // 🔓 Rotas públicas (qualquer um pode acessar)
 router.get('/', getSalao); // Listar todos os salões
 router.get('/:id', getSalaoById); // Listar um salão específico
+router.get('/buscar/celular/:celular', buscarSalaoNumero); // Listar um salão específico
 
 // 🔒 Rotas protegidas (apenas usuários autenticados podem acessar)
 router.post('/', verificarToken, createSalao); // Criar um novo salão

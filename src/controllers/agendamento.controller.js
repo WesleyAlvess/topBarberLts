@@ -7,7 +7,7 @@ import Salao from "../models/salao.model.js"
 export const createAgendamento = async (req, res) => {
   try {
     const salaoId = req.params.salaoId // Pega o ID do salão
-    const { servicoId, dataAgendamento, horarioAgendamento} = req.body // Pega os dados do corpo da requisição
+    const { servicoId, dataAgendamento, horarioAgendamento } = req.body // Pega os dados do corpo da requisição
     const clienteId = req.usuario.id // Pega o ID do cliente logado
 
     // Verifica se o serviço existe
@@ -18,7 +18,7 @@ export const createAgendamento = async (req, res) => {
 
     // Verifica se o serviço pertence ao salão
     const servico = await Servico.findById(servicoId)
-    if(!servico || servico.salao.toString() !== salaoId) {
+    if (!servico || servico.salao.toString() !== salaoId) {
       return res.status(400).json({ mensagem: "Serviço não pertence a este salão" })
     }
 
@@ -28,16 +28,16 @@ export const createAgendamento = async (req, res) => {
       salao: salaoId,
       dias: diaSemana
     })
-    if(!horarioSalao) {
+    if (!horarioSalao) {
       return res.status(400).json({ mensagem: "Salão não abre nesse dia" })
     }
 
     // Verifica se o horário escolhido está disponível
     const horarioEscolhido = horarioSalao.horarios.find(horar => horar.hora === horarioAgendamento && horar.disponivel === true)
-    if(!horarioEscolhido) {
+    if (!horarioEscolhido) {
       return res.status(400).json({ message: "Horário não disponível" });
     }
-    
+
     // Verifica se o horário já está agendado
     const jaAgendado = await Agendamento.findOne({
       salao: salaoId,
@@ -45,10 +45,10 @@ export const createAgendamento = async (req, res) => {
       horario: horarioAgendamento,
     })
 
-    if(jaAgendado) {
+    if (jaAgendado) {
       return res.status(400).json({ mensagem: "Este horário já está ocupado" })
     }
-    
+
     // Cria o agendamento
     const novoAgendamento = new Agendamento({
       cliente: clienteId,
@@ -60,7 +60,7 @@ export const createAgendamento = async (req, res) => {
 
     // Atualiza o horário como indisponível (campo disponivel = false)
     const horarioIndex = horarioSalao.horarios.findIndex((horar) => horar.hora === horarioAgendamento)
-    if(horarioIndex !== -1) {
+    if (horarioIndex !== -1) {
       horarioSalao.horarios[horarioIndex].disponivel = false
       await horarioSalao.save() // Salva as alterações no banco
     }
@@ -69,11 +69,11 @@ export const createAgendamento = async (req, res) => {
 
     // Popula o agendamento com os dados do salão
     const agendamentoPopulado = await Agendamento.findById(novoAgendamento._id)
-    .populate("salao", "nome endereco") // Traz o nome, endereco do salao
-    .populate("servico", "titulo preco duracao") // Traz o servico, titulo e preco
-    .populate("cliente", "nome") // Taz o cliente
-    .populate("horario", "hora disponivel") // Traz o horario
-    
+      .populate("salao", "nome endereco") // Traz o nome, endereco do salao
+      .populate("servico", "titulo preco duracao") // Traz o servico, titulo e preco
+      .populate("cliente", "nome") // Taz o cliente
+
+
 
     return res.status(201).json(agendamentoPopulado) // Retorna o agendamento Populado
 
@@ -86,14 +86,14 @@ export const createAgendamento = async (req, res) => {
 export const listarAgendamentos = async (req, res) => {
   try {
     const agendamentos = await Agendamento.find() // Busca todos os agendamentos no banco
-    .populate("salao", "nome endereco") // Traz o nome, endereco do salao
-    .populate("servico", "titulo preco duracao") // Traz o servico, titulo e preco
-    .populate("cliente", "nome") // Taz o cliente
-    .populate("horario", "hora") // Traz o horario
-    .sort({ dataCadastro: -1 }) // Ordena pelos mais recentes primeiro
+      .populate("salao", "nome endereco") // Traz o nome, endereco do salao
+      .populate("servico", "titulo preco duracao") // Traz o servico, titulo e preco
+      .populate("cliente", "nome") // Taz o cliente
+      .populate("horario", "hora") // Traz o horario
+      .sort({ dataCadastro: -1 }) // Ordena pelos mais recentes primeiro
 
     // Verifica de existe agendamentos
-    if(!agendamentos) {
+    if (!agendamentos) {
       return res.status(400).json({ mensagem: "Agendamentos não encontrados" })
     }
 
@@ -111,16 +111,16 @@ export const listarAgendamentoById = async (req, res) => {
     const agendamentoId = req.params.id // Pega o ID do agendamento
 
     const listarUmAgendamento = await Agendamento.findById(agendamentoId)
-    .populate("salao", "nome endereco") // Traz o nome, endereco do salao
-    .populate("servico", "titulo preco duracao") // Traz o servico, titulo e preco
-    .populate("cliente", "nome") // Taz o cliente
-    .populate("horario", "hora") // Traz o horario
-    if(!listarAgendamentoById) {
+      .populate("salao", "nome endereco") // Traz o nome, endereco do salao
+      .populate("servico", "titulo preco duracao") // Traz o servico, titulo e preco
+      .populate("cliente", "nome") // Taz o cliente
+      .populate("horario", "hora") // Traz o horario
+    if (!listarUmAgendamento) {
       return res.status(400).json({ mensagem: "Agendamento não encontrado" })
     }
 
     return res.status(200).json(listarUmAgendamento)
-    
+
   } catch (err) {
     return res.status(500).json({ mensagem: "Erro ao listar agendamento", erro: err.message })
   }
@@ -134,17 +134,17 @@ export const cancelarAgendamento = async (req, res) => {
 
     // Busca agendamento no banco e verifica se ele existe
     const agendamento = await Agendamento.findById(id)
-    if(!agendamento) {
+    if (!agendamento) {
       return res.status(400).json({ mensagem: "Agendamento não encontrado" })
     }
 
     // verifica se o usuario logado e dono do agendamento
-    if(agendamento.cliente.toString() !== usuarioId) {
+    if (agendamento.cliente.toString() !== usuarioId) {
       return res.status(403).json({ mensagem: "Você não tem permissão para cancelar este agendamento" });
     }
 
     // Verifica se o agendamento já está cancelado
-    if(agendamento.status === "cancelado") {
+    if (agendamento.status === "cancelado") {
       return res.status(400).json({ mensagem: "Este agendamento já foi cancelado" })
     }
 
@@ -159,9 +159,9 @@ export const cancelarAgendamento = async (req, res) => {
     const diferencaHoras = diferencaMS / (1000 * 60 * 60) // Converte para horas
 
     // Verifica se faltam menos de 2 horas para o agendamento
-    if(diferencaHoras < 2) {
+    if (diferencaHoras < 2) {
       return res.status(400).json({ mensagem: "O cancelamento só pode ser feito até 2 horas antes do horário agendado" });
-    } 
+    }
 
     agendamento.status = "cancelado"  // Atualiza o status do agendamento para "cancelado"
     agendamento.cancelado = "true" // Atualiza o valor de cancelado pra true

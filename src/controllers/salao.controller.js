@@ -137,7 +137,6 @@ export const getSalaoById = async (req, res) => {
   }
 }
 
-
 // Atualizar um salão específico
 export const updateSalao = async (req, res) => {
   try {
@@ -209,5 +208,35 @@ export const deleteSalao = async (req, res) => {
     // Trata erros inesperados
     console.error("Erro ao deletar salão:", err);
     return res.status(500).json({ error: err.message })
+  }
+}
+
+// Buscar Salao pelo seu numero de celular
+export const buscarSalaoNumero = async (req, res) => {
+  try {
+    // Recebendo numero vindo dos parametros da requisição
+    const { celular } = req.params
+    console.log(celular);
+
+    // Busca o usuário com esse celular
+    const usuario = await Usuario.findOne({ telefone: celular })
+
+    if (!usuario) {
+      return res.status(404).json({ mensagem: 'Usuário não encontrado com esse celular.' })
+    }
+
+    // Busca o salão cujo dono é esse usuário
+    const salao = await Salao.findOne({ dono: usuario._id }).populate('servicos')
+
+    if (!salao) {
+      return res.status(404).json({ mensagem: 'Salão não encontrado para esse número de celular.' })
+    }
+
+    res.status(200).json(salao)
+
+  } catch (error) {
+    // Trata erros inesperados
+    console.error("Erro ao buscar salão pelo seu número:", error);
+    return res.status(500).json({ error: error.message })
   }
 }
