@@ -11,6 +11,7 @@ import {
   updateHorario,
   deleteHorario,
   getHorarios,
+  calcularHorariosDisponiveis
 } from '../controllers/horario.controller.js';
 
 // Middleware para verificar se o token JWT está presente e válido
@@ -26,5 +27,6 @@ router.get('/:salaoId', getHorarios); // Listar horários do salão
 router.post('/:salaoId', verificarToken, verificaDonoRecurso(Salao), createHorario); // Criar horário
 router.patch('/:salaoId/:id', verificarToken, verificaDonoRecurso(Salao), updateHorario); // Atualizar horário
 router.delete('/:salaoId', verificarToken, verificaDonoRecurso(Salao), deleteHorario); // Deletar horário
+router.get('/disponiveis/:salaoId', calcularHorariosDisponiveis); // Caucular horarios disponiveis
 
 export default router;

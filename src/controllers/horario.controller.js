@@ -139,7 +139,7 @@ export const deleteHorario = async (req, res) => {
       return res.status(400).json({ message: "ID do salão inválido" });
     }
 
-    const resultado = await Horario.deleteMany({ salao: salaoId });
+    await Horario.deleteMany({ salao: salaoId });
 
     return res.status(200).json({ message: "Todos os horários foram apagados com sucesso!" });
 
@@ -148,3 +148,46 @@ export const deleteHorario = async (req, res) => {
     return res.status(500).json({ mensagem: "Erro ao deletar horário", erro: err.message });
   }
 };
+
+
+// Função para calcular horários disponíveis para os próximos 7 dias
+export const calcularHorariosDisponiveis = async (req, res) => {
+  try {
+    const { salaoId } = req.params;
+    const horarioCadastrado = await Horario.findOne({ salao: salaoId });
+
+    // Obter a data atual
+    const hoje = new Date();
+    const diasDisponiveis = [];
+
+    // Loop para os próximos 7 dias
+    for (let i = 0; i < 7; i++) {
+      const diaAtual = new Date(hoje);
+      diaAtual.setDate(hoje.getDate() + i); // Avança um dia por vez
+
+      // Obtém o número do dia da semana (0 = domingo, 1 = segunda-feira, ...)
+      const diaSemana = diaAtual.getDay();
+
+      // Encontre os horários do dia correspondente (usando o número do dia)
+      const horariosDia = horarioCadastrado.dias.find(dia => dia.dia === diaSemana);
+
+      // Se o salão estiver aberto neste dia
+      if (horariosDia && !horariosDia.fechado) {
+        diasDisponiveis.push({
+          dia: diaSemana, // Ex: 0 para domingo, 1 para segunda-feira
+          data: diaAtual.toISOString().split('T')[0], // Data no formato yyyy-mm-dd
+          horariosDisponiveis: horariosDia.horarios.filter(horario => horario.disponivel),
+        });
+      }
+    }
+
+    return res.status(200).json({
+      mensagem: 'Horários disponíveis encontrados com sucesso!',
+      diasDisponiveis,
+    });
+  } catch (err) {
+    console.error("Erro ao procurar horários disponíveis:", err);
+    return res.status(500).json({ mensagem: "Erro ao procurar horários disponíveis", erro: err.message });
+  }
+};
+
