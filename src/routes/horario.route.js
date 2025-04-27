@@ -22,11 +22,11 @@ import { verificaDonoRecurso } from '../middlewares/verificaDonoRecurso.middlewa
 
 // 🔓 Rotas públicas
 router.get('/:salaoId', getHorarios); // Listar horários do salão
+router.get('/disponiveis/:salaoId', calcularHorariosDisponiveis); // Caucular horarios disponiveis
 
 // // 🔒 Rotas protegidas (apenas donos do salão podem gerenciar horários)
 router.post('/:salaoId', verificarToken, verificaDonoRecurso(Salao), createHorario); // Criar horário
 router.patch('/:salaoId/:id', verificarToken, verificaDonoRecurso(Salao), updateHorario); // Atualizar horário
 router.delete('/:salaoId', verificarToken, verificaDonoRecurso(Salao), deleteHorario); // Deletar horário
-router.get('/disponiveis/:salaoId', calcularHorariosDisponiveis); // Caucular horarios disponiveis
 
 export default router;

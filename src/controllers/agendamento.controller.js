@@ -6,36 +6,45 @@ import Salao from "../models/salao.model.js"
 // Criar agendamento
 export const createAgendamento = async (req, res) => {
   try {
-    const salaoId = req.params.salaoId // Pega o ID do salão
-    const { servicoId, dataAgendamento, horarioAgendamento } = req.body // Pega os dados do corpo da requisição
-    const clienteId = req.usuario.id // Pega o ID do cliente logado
+    const salaoId = req.params.salaoId; // Pega o ID do salão
+    const { servicoId, dataAgendamento, horarioAgendamento } = req.body; // Pega os dados do corpo da requisição
+    const clienteId = req.usuario.id; // Pega o ID do cliente logado
 
-    // Verifica se o serviço existe
-    const salao = await Salao.findById(salaoId)
+    // Verifica se o salão existe
+    const salao = await Salao.findById(salaoId);
     if (!salao) {
-      return res.status(400).json({ mensagem: "Salão não encontrado" })
+      return res.status(400).json({ mensagem: "Salão não encontrado" });
     }
 
-    // Verifica se o serviço pertence ao salão
-    const servico = await Servico.findById(servicoId)
+    // Verifica se o serviço existe e pertence ao salão
+    const servico = await Servico.findById(servicoId);
     if (!servico || servico.salao.toString() !== salaoId) {
-      return res.status(400).json({ mensagem: "Serviço não pertence a este salão" })
+      return res.status(400).json({ mensagem: "Serviço não pertence a este salão" });
     }
 
-    // Verifica se o horário está cadastrado para esse dia
-    const diaSemana = new Date(dataAgendamento).getDay() // Pega o dia da semana da data do agendamento
-    const horarioSalao = await Horario.findOne({
-      salao: salaoId,
-      dias: diaSemana
-    })
+    // Pega o dia da semana da data do agendamento (0-6)
+    const diaSemana = new Date(dataAgendamento).getDay();
+
+    // Busca o horário do salão
+    const horarioSalao = await Horario.findOne({ salao: salaoId });
     if (!horarioSalao) {
-      return res.status(400).json({ mensagem: "Salão não abre nesse dia" })
+      return res.status(400).json({ mensagem: "Horários do salão não encontrados" });
+    }
+
+    // Procura o dia específico nos horários
+    const diaEncontrado = horarioSalao.dias.find(d => d.dia === diaSemana);
+    if (!diaEncontrado) {
+      return res.status(400).json({ mensagem: "Salão não abre nesse dia" });
+    }
+
+    if (diaEncontrado.fechado) {
+      return res.status(400).json({ mensagem: "Salão está fechado nesse dia" });
     }
 
     // Verifica se o horário escolhido está disponível
-    const horarioEscolhido = horarioSalao.horarios.find(horar => horar.hora === horarioAgendamento && horar.disponivel === true)
-    if (!horarioEscolhido) {
-      return res.status(400).json({ message: "Horário não disponível" });
+    const horarioDisponivel = diaEncontrado.horarios.find(h => h.hora === horarioAgendamento && h.disponivel);
+    if (!horarioDisponivel) {
+      return res.status(400).json({ mensagem: "Horário não disponível" });
     }
 
     // Verifica se o horário já está agendado
@@ -43,10 +52,10 @@ export const createAgendamento = async (req, res) => {
       salao: salaoId,
       data: dataAgendamento,
       horario: horarioAgendamento,
-    })
-
+      cancelado: false,
+    });
     if (jaAgendado) {
-      return res.status(400).json({ mensagem: "Este horário já está ocupado" })
+      return res.status(400).json({ mensagem: "Este horário já está ocupado" });
     }
 
     // Cria o agendamento
@@ -55,32 +64,29 @@ export const createAgendamento = async (req, res) => {
       salao: salaoId,
       servico: servicoId,
       data: dataAgendamento,
-      horario: horarioAgendamento
-    })
+      horario: horarioAgendamento,
+    });
 
-    // Atualiza o horário como indisponível (campo disponivel = false)
-    const horarioIndex = horarioSalao.horarios.findIndex((horar) => horar.hora === horarioAgendamento)
-    if (horarioIndex !== -1) {
-      horarioSalao.horarios[horarioIndex].disponivel = false
-      await horarioSalao.save() // Salva as alterações no banco
-    }
+    await novoAgendamento.save(); // Salva o agendamento no banco
 
-    await novoAgendamento.save() // Salva o agendamento no banco
+    // Atualiza o horário para indisponível
+    horarioDisponivel.disponivel = false;
+    await horarioSalao.save();
 
-    // Popula o agendamento com os dados do salão
+    // Popula os dados do agendamento
     const agendamentoPopulado = await Agendamento.findById(novoAgendamento._id)
-      .populate("salao", "nome endereco") // Traz o nome, endereco do salao
-      .populate("servico", "titulo preco duracao") // Traz o servico, titulo e preco
-      .populate("cliente", "nome") // Taz o cliente
+      .populate("salao", "nome endereco")
+      .populate("servico", "titulo preco duracao")
+      .populate("cliente", "nome");
 
-
-
-    return res.status(201).json(agendamentoPopulado) // Retorna o agendamento Populado
+    return res.status(201).json(agendamentoPopulado);
 
   } catch (err) {
-    return res.status(500).json({ mensagem: "Erro ao criar agendamento", erro: err.message })
+    console.error(err);
+    return res.status(500).json({ mensagem: "Erro ao criar agendamento", erro: err.message });
   }
-}
+};
+
 
 // Listar agendamentos
 export const listarAgendamentos = async (req, res) => {
