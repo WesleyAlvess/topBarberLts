@@ -87,6 +87,30 @@ export const createAgendamento = async (req, res) => {
   }
 };
 
+// Verificar se ha um agendamento
+export const verificaSeTemAgendamento = async (req, res) => {
+  try {
+    const usuarioId = req.usuario.id
+    const salaoId = req.params.salaoId
+
+    const agendamento = await Agendamento.findOne({
+      cliente: usuarioId,
+      salao: salaoId,
+      cancelado: false,
+      status: "pendente"
+    }).populate("servico")
+
+    if (!agendamento) {
+      return res.status(200).json({ existe: false });
+    }
+
+    return res.status(200).json({ existe: true, agendamento });
+
+  } catch (error) {
+    return res.status(500).json({ erro: "Erro ao verificar agendamento" });
+  }
+}
+
 
 // Listar agendamentos
 export const listarAgendamentos = async (req, res) => {
